@@ -13,7 +13,7 @@ import TalentPage from "./pages/TalentPage";
 import TalentDashboard from './pages/TalentDashboard';
 import HRDashboard from './pages/HRDashboard';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-
+//
 const App = () => {
   return (
     <Router>
