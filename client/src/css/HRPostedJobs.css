@@ -1,0 +1,61 @@
+/* Container for the list of job posts */
+.job-list-container {
+  padding: 20px;
+  text-align: center;
+}
+
+/* Job List grid layout */
+.job-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+/* Each Job Card box */
+.job-card {
+  border: 2px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none; /* Remove the default outline */
+}
+
+/* Job Card title style */
+.job-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+/* Paragraph style for description, location, salary */
+.job-card p {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.job-card strong {
+  font-weight: bold;
+}
+
+/* Hover effect for job card */
+.job-card:hover {
+  background-color: gray;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+}
+
+/* Ensure text color remains white on hover */
+.job-card:hover h3,
+.job-card:hover p,
+.job-card:hover strong {
+  color: white;
+}
+
+/* Remove the outline when the card is focused */
+.job-card:focus {
+  outline: none;
+}
