@@ -4,11 +4,6 @@ const Job = require('../models/job'); // Job model
 const { verifyToken } = require('../../utils/authMiddleware'); // Authentication middleware
 const HRPartner = require('../models/hrPartner'); // To verify the poster is an HR partner
 
-// Test route
-/*router.get('/', (req, res) => {
-  res.send('Job Route is working!');
-});*/
-
 // Post a new job (Only HR Partners)
 router.post('/post', verifyToken, async (req, res) => {
   const { title, description, requirements, requiredSkills, salary, location, companyName } = req.body;
@@ -64,4 +59,31 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
+// Fetch a job by ID
+router.get('/:id', verifyToken, async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+    res.status(200).json({ job });
+  } catch (error) {
+    console.error('Error fetching job:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update a job by ID
+router.put('/:id', verifyToken, async (req, res) => {
+  try {
+    const job = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+    res.status(200).json({ message: 'Job updated successfully', job });
+  } catch (error) {
+    console.error('Error updating job:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 module.exports = router;

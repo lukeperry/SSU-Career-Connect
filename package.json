@@ -2,10 +2,10 @@
   "name": "ssu-career-connect",
   "version": "1.0.0",
   "description": "An Innovative Job Outsourcing Platform",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "nodemon --watch . index.js",
-    "start": "nodemon index.js",
+    "dev": "nodemon --watch . server.js",
+    "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Luke Perry Buenaventura",

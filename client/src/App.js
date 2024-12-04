@@ -8,6 +8,7 @@ import HRLogin from "./pages/HRLogin";
 import HRLayout from './components/HRLayout';
 import HRPostedJobs from './pages/HRPostedJobs';
 import HRPostJob from './pages/HRPostJob';
+import HREditJob from './pages/HREditJob'
 import HRProfile from './pages/HRProfile';
 import TalentPage from "./pages/TalentPage";
 import TalentDashboard from './pages/TalentDashboard';
@@ -27,6 +28,7 @@ const App = () => {
         <Route path="/hr/profile" element={<ProtectedRoute><HRLayout><HRProfile /></HRLayout></ProtectedRoute>} />
         <Route path="/hr/posted-jobs" element={<ProtectedRoute><HRLayout><HRPostedJobs /></HRLayout></ProtectedRoute>} />
         <Route path="/hr/post-job" element={<ProtectedRoute><HRLayout><HRPostJob /></HRLayout></ProtectedRoute>} />
+        <Route path="/hr/edit-job/:id" element={<ProtectedRoute><HRLayout><HREditJob /></HRLayout></ProtectedRoute>} />
 
         <Route path="/talent" element={<TalentPage />} />
         <Route path="/talent/login" element={<div>Talent Login Page</div>} />

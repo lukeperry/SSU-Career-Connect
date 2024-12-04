@@ -36,7 +36,6 @@ const dashboardRoutes = require('./api/routes/dashboardRoutes');
 app.use('/api/auth', authRoutes);  // Auth-related routes like login, register
 app.use('/api/jobs', jobRoutes);   // Job-related routes like create job, list jobs
 app.use('/api/users', userRoutes); // User-related routes like profile management
-app.use('/api/dashboard', dashboardRoutes); // Dashboard routes for talents and HRs
 app.use('/api/application', applicationRoutes); // Application routes for talents and HRs
 app.use('/api/dashboard', dashboardRoutes); // Dashboard routes for talents and HRs
 
