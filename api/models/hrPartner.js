@@ -6,12 +6,14 @@ const hrPartnerSchema = new mongoose.Schema({
   password: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   companyName: { type: String, required: true },
+  profilePicture: { type: String }, // Add this field
   jobPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Job' }],  // Job posts created by HR
   createdAt: { type: Date, default: Date.now },
 });
 
 // Method to compare password
 hrPartnerSchema.methods.matchPassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
-  };
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
 module.exports = mongoose.model('HRPartner', hrPartnerSchema);
