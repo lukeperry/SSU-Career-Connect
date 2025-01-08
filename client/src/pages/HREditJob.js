@@ -25,7 +25,7 @@ const HREditJob = () => {
     const fetchJob = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`http://localhost:5000/api/jobs/${id}`, {
+        const response = await axios.get(`/api/jobs/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
