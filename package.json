@@ -5,12 +5,14 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon --watch . server.js",
-    "start": "nodemon server.js",
+    "start": "concurrently \"yarn start:backend\"",
+    "start:backend": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Luke Perry Buenaventura",
   "license": "ISC",
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "nodemon": "^3.1.7"
   },
   "dependencies": {

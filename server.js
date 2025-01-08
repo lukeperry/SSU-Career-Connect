@@ -15,7 +15,6 @@ connectDB();
 // Initialize Express app
 const app = express();
 
-
 // Middleware
 app.use(cors());  // Allow cross-origin requests
 app.use(bodyParser.json()); // Parse JSON requests
@@ -23,11 +22,6 @@ app.use(express.json());
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Home route
-//app.get('/', (req, res) => {
-//  res.send('Welcome to SSU Career Connect Platform!');
-//});
 
 // Import routes
 const authRoutes = require('./api/routes/authRoutes');
@@ -44,12 +38,6 @@ app.use('/api/users', userRoutes); // User-related routes like profile managemen
 app.use('/api/application', applicationRoutes); // Application routes for talents and HRs
 app.use('/api/dashboard', dashboardRoutes); // Dashboard routes for talents and HRs
 app.use('/api/hr', hrRoutes); // Use HR routes
-
-//production scripts
-app.use(express.static("./client/build"));
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-});
 
 // Serve static files from the 'client/build' folder
 app.use(express.static(path.join(__dirname, 'client', 'build')));

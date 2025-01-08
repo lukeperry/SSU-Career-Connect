@@ -37,7 +37,9 @@ router.post('/upload-profile-picture', verifyToken, upload.single('profilePictur
       return res.status(404).json({ message: 'HR Partner not found' });
     }
 
-    hrPartner.profilePicture = `/uploads/${req.file.filename}`;
+    const profilePictureUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    console.log('Profile picture URL:', profilePictureUrl);
+    hrPartner.profilePicture = profilePictureUrl;
     await hrPartner.save();
 
     res.status(200).json({ profilePicture: hrPartner.profilePicture });
