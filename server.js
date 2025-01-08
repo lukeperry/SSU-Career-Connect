@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const connectDB = require('./config/db'); 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 const path = require('path');
 
 // Connect to the database
@@ -24,9 +24,9 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Home route
-app.get('/', (req, res) => {
-  res.send('Welcome to SSU Career Connect Platform!');
-});
+//app.get('/', (req, res) => {
+//  res.send('Welcome to SSU Career Connect Platform!');
+//});
 
 // Import routes
 const authRoutes = require('./api/routes/authRoutes');
@@ -49,6 +49,19 @@ app.use(express.static("./client/build"));
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
 });
+
+// Serve static files from the 'client/build' folder
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
+// Route all other requests to 'index.html' from the build folder
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+});
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log(err));
 
 // Start the server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
