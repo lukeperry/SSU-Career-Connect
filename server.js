@@ -16,14 +16,8 @@ connectDB();
 const app = express();
 
 
-const corsOptions = {
-  origin: ['http://localhost:5000', 'https://ssucareerconnect.azurewebsites.net', 'https://ssucareerconnect.lpzb.tech'],
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
 // Middleware
-app.use(cors(corsOptions));  // Allow cross-origin requests
+app.use(cors());  // Allow cross-origin requests
 app.use(bodyParser.json()); // Parse JSON requests
 app.use(express.json());
 
