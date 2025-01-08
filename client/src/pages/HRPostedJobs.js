@@ -13,7 +13,7 @@ const HRPostedJobs = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/jobs', {
+        const response = await axios.get('./api/jobs', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },

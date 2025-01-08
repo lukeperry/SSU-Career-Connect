@@ -62,7 +62,7 @@ const HRProfile = () => {
       <h2 className="profile-title">Profile</h2>
       <div className="profile-picture-container">
         <img
-          src={`/${hrDetails.profilePicture}`} // Ensure the URL is correct
+          src={hrDetails.profilePicture} // Ensure the URL is correct
           alt="Profile"
           className="profile-picture"
         />
@@ -91,8 +91,8 @@ const HRProfile = () => {
         }}
       >
         {preview && <img src={preview} alt="Preview" className="preview-image" />}
-        <button className="upload-button" onClick={handlePictureUpload}>Upload Picture</button>
-        <button className="cancel-button" onClick={() => setModalIsOpen(false)}>Cancel</button>
+        <button onClick={handlePictureUpload}>Upload Picture</button>
+        <button onClick={() => setModalIsOpen(false)}>Cancel</button>
       </Modal>
       <div className="profile-details">
         <div className="profile-box">
