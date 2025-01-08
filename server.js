@@ -43,10 +43,10 @@ app.use('/api/application', applicationRoutes); // Application routes for talent
 app.use('/api/dashboard', dashboardRoutes); // Dashboard routes for talents and HRs
 app.use('/api/hr', hrRoutes); // Use HR routes
 
-
-app.use(express.static("./frontend/build"));
+//production scripts
+app.use(express.static("./client/build"));
 app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"));
+  res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
 });
 
 // Start the server
