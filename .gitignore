@@ -22,7 +22,6 @@ out/
 
 # Build directories
 dist/
-build/
 
 #Profile Pictures
 uploads/
