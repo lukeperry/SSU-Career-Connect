@@ -43,6 +43,12 @@ app.use('/api/application', applicationRoutes); // Application routes for talent
 app.use('/api/dashboard', dashboardRoutes); // Dashboard routes for talents and HRs
 app.use('/api/hr', hrRoutes); // Use HR routes
 
+
+app.use(express.static("./frontend/build"));
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"));
+});
+
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

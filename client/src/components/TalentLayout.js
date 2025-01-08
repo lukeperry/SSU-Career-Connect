@@ -1,18 +1,16 @@
-// HRLayout.js 
-// This file refers to the menu buttons of the user.
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const HRLayout = ({ children }) => {
+const TalentLayout = ({ children }) => {
 
   return (
     <div>
       <nav className="bg-gray-800 p-4 text-white">
         <ul className="flex space-x-4">
-          <li><Link to="/hr/dashboard">Home</Link></li>
-          <li><Link to="/hr/profile">Profile</Link></li>
-          <li><Link to="/hr/posted-jobs">Posted Jobs</Link></li>
-          <li><Link to="/hr/post-job">Post a Job</Link></li>
+          <li><Link to="/talent/dashboard">Home</Link></li>
+          <li><Link to="/talent/profile">Profile</Link></li>
+          <li><Link to="/talent/job-board">Job Board</Link></li>
+          <li><Link to="/talent/messages">Messages</Link></li>
           <li><Link to="/" onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('userRole'); }}>Logout</Link></li>
         </ul>
       </nav>
@@ -23,4 +21,4 @@ const HRLayout = ({ children }) => {
   );
 };
 
-export default HRLayout;
+export default TalentLayout;

@@ -12,6 +12,12 @@ import HREditJob from './pages/HREditJob'
 import HRProfile from './pages/HRProfile';
 import TalentPage from "./pages/TalentPage";
 import TalentDashboard from './pages/TalentDashboard';
+import TalentRegister from "./pages/TalentRegister";
+import TalentLogin from "./pages/TalentLogin"; // Import TalentLogin component
+import TalentProfile from './pages/TalentProfile'; // Import TalentProfile component
+import TalentJobBoard from './pages/TalentJobBoard'; // Import TalentJobBoard component
+import TalentMessages from './pages/TalentMessages'; // Import TalentMessages component
+import TalentLayout from './components/TalentLayout'; // Import TalentLayout component
 import HRDashboard from './pages/HRDashboard';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 //
@@ -31,9 +37,12 @@ const App = () => {
         <Route path="/hr/edit-job/:id" element={<ProtectedRoute><HRLayout><HREditJob /></HRLayout></ProtectedRoute>} />
 
         <Route path="/talent" element={<TalentPage />} />
-        <Route path="/talent/login" element={<div>Talent Login Page</div>} />
-        <Route path="/talent/register" element={<div>Talent Register Page</div>} />
-        <Route path="/talent/dashboard" element={<TalentDashboard />} />
+        <Route path="/talent/login" element={<TalentLogin />} /> {/* Talent Login */}
+        <Route path="/talent/register" element={<TalentRegister />} /> {/* Talent Register */}
+        <Route path="/talent/dashboard" element={<ProtectedRoute><TalentLayout><TalentDashboard /></TalentLayout></ProtectedRoute>} />
+        <Route path="/talent/profile" element={<ProtectedRoute><TalentLayout><TalentProfile /></TalentLayout></ProtectedRoute>} /> {/* Talent Profile */}
+        <Route path="/talent/job-board" element={<ProtectedRoute><TalentLayout><TalentJobBoard /></TalentLayout></ProtectedRoute>} /> {/* Talent Job Board */}
+        <Route path="/talent/messages" element={<ProtectedRoute><TalentLayout><TalentMessages /></TalentLayout></ProtectedRoute>} /> {/* Talent Messages */} 
       </Routes>
     </Router>
   );
