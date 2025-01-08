@@ -13,7 +13,7 @@ const HRProfile = () => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get("http://localhost:5000/api/hr/profile", {
+        const response = await axios.get("/api/hr/profile", {
           headers: { Authorization: `Bearer ${token}` }
         });
         setHrDetails(response.data);
@@ -40,7 +40,7 @@ const HRProfile = () => {
 
     try {
       console.log('Uploading picture:', profilePicture);
-      const response = await axios.post("http://localhost:5000/api/hr/upload-profile-picture", formData, {
+      const response = await axios.post("/api/hr/upload-profile-picture", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
@@ -62,7 +62,7 @@ const HRProfile = () => {
       <h2 className="profile-title">Profile</h2>
       <div className="profile-picture-container">
         <img
-          src={`http://localhost:5000${hrDetails.profilePicture}`} // Ensure the URL is correct
+          src={`/${hrDetails.profilePicture}`} // Ensure the URL is correct
           alt="Profile"
           className="profile-picture"
         />

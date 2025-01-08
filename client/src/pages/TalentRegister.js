@@ -24,7 +24,7 @@ const TalentRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/register/talent", formData);
+      const response = await axios.post("/api/auth/register/talent", formData);
       console.log(response.data); // Optional: Log or process the response
       setMessage("Registration successful! Please log in.");
       setFormData({
