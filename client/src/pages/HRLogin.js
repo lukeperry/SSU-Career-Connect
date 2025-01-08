@@ -21,7 +21,7 @@ const HRLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login/hr", formData);
+      const response = await axios.post("/api/auth/login/hr", formData);
       const { token, companyName } = response.data;
       console.log(response.data); // Log the server's response or process it
       setMessage(response.data.message || "Login successful!");
