@@ -13,7 +13,7 @@ const HRProfile = () => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get("/api/hr/profile", {
+        const response = await axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/hr/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setHrDetails(response.data);
@@ -40,7 +40,7 @@ const HRProfile = () => {
 
     try {
       console.log('Uploading picture:', profilePicture);
-      const response = await axios.post("/api/hr/upload-profile-picture", formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_ADDRESS}/api/hr/upload-profile-picture`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"

@@ -59,7 +59,7 @@ const HRPostJob = () => {
       try {
         console.log('Submitting job with data:', formData); // Log the form data
         const response = await axios.post(
-          "http://localhost:5000/api/jobs/post",
+          `${process.env.REACT_APP_API_ADDRESS}/api/jobs/post`,
           formData,
           {
             headers: {

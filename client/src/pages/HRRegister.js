@@ -23,7 +23,7 @@ const HRRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/auth/register/hr", formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_ADDRESS}/api/auth/register/hr`, formData);
       console.log(response.data); // Optional: Log or process the response
       setMessage("Registration successful! Please log in.");
       setFormData({ username: "", email: "", password: "", companyName: "" });

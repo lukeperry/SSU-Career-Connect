@@ -40,12 +40,12 @@ app.use('/api/dashboard', dashboardRoutes); // Dashboard routes for talents and 
 app.use('/api/hr', hrRoutes); // Use HR routes
 
 // Serve static files from the 'client/build' folder
-app.use(express.static(path.join(__dirname, 'client', 'build')));
+//app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 // Route all other requests to 'index.html' from the build folder
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-});
+//app.get('*', (req, res) => {
+//  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+//});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })

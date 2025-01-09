@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "description": "An Innovative Job Outsourcing Platform",
   "main": "server.js",
-  "scripts": {
-    "dev": "nodemon --watch . server.js",
-    "start": "concurrently \"yarn start:backend\"",
-    "start:backend": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+"scripts": {
+  "dev": "concurrently \"yarn start:backend\" \"yarn start:frontend\"",
+  "start:backend": "nodemon --watch . server.js", 
+  "start:frontend": "cd client && yarn start", 
+  "start": "node server.js", 
+  "test": "echo \"Error: no test specified\" && exit 1"
   },
+
   "author": "Luke Perry Buenaventura",
   "license": "ISC",
   "devDependencies": {

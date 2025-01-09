@@ -8,7 +8,7 @@ const TalentDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem('token'); // Retrieve token
-
+//Will Update the URL
       try {
         const response = await fetch(`${BASE_URL}/dashboard/talent`, {
           method: 'GET',

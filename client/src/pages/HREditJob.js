@@ -25,7 +25,7 @@ const HREditJob = () => {
     const fetchJob = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`/api/jobs/${id}`, {
+        const response = await axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/jobs/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -78,7 +78,7 @@ const HREditJob = () => {
       try {
         console.log('Updating job with data:', formData); // Log the form data
         const response = await axios.put(
-          `http://localhost:5000/api/jobs/${id}`,
+          `${process.env.REACT_APP_API_ADDRESS}/api/jobs/${id}`,
           formData,
           {
             headers: {
