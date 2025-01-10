@@ -44,12 +44,18 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        working-directory: ./client
-        run: yarn install
+        run: |
+          cd client
+          yarn install
 
       - name: Build the frontend
-        working-directory: ./client
-        run: yarn build
+        run: |
+          cd client
+          yarn build
+
+      - name: Copy startup.sh to wwwroot
+        run: |
+          cp client/startup.sh /home/site/wwwroot/startup.sh
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
