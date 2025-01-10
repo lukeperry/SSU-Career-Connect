@@ -44,14 +44,12 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: |
-          cd client
-          yarn install
+        working-directory: ./client
+        run: yarn install
 
       - name: Build the frontend
-        run: |
-          cd client
-          yarn build
+        working-directory: ./client
+        run: yarn build
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
