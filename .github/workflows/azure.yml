@@ -54,4 +54,4 @@ jobs:
           app-name: ssucareerconnect
           slot-name: production
           publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
-          package: ./client/build  # Specify the build folder
+          package: ./client
