@@ -31,40 +31,40 @@ jobs:
           publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
           package: ./server
 
-deploy_frontend:
-  runs-on: ubuntu-latest
+  deploy_frontend:
+    runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '20'
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
 
-    - name: Cache dependencies
-      uses: actions/cache@v2
-      with:
-        path: ~/.yarn
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-yarn-
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
-    - name: Clean build folder (if exists)
-      run: |
-        rm -rf ./client/build  # Clean any previous build output to avoid issues
+      - name: Clean build folder (if exists)
+        run: |
+          rm -rf ./client/build  # Clean any previous build output to avoid issues
 
-    - name: Install dependencies and build
-      run: |
-        cd client
-        yarn install --frozen-lockfile
-        yarn build --verbose  # Build with verbose logging
+      - name: Install dependencies and build
+        run: |
+          cd client
+          yarn install --frozen-lockfile
+          yarn build --verbose  # Build with verbose logging
 
-    - name: Deploy to Azure App Service (Frontend)
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: ssucareerconnect
-        slot-name: production
-        publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
-        package: ./client/build
+      - name: Deploy to Azure App Service (Frontend)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ssucareerconnect
+          slot-name: production
+          publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
+          package: ./client/build
