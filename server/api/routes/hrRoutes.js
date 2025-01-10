@@ -2,43 +2,49 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
+const { BlobServiceClient, generateBlobSASQueryParameters, BlobSASPermissions } = require('@azure/storage-blob');
 const { verifyToken } = require('../../utils/authMiddleware');
 const HRPartner = require('../models/hrPartner');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
 
 // Set up multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../uploads')); // Ensure the directory exists
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${req.user.id}-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    // Optional: Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (!allowedTypes.includes(file.mimetype)) {
-      return cb(new Error('Only JPEG and PNG images are allowed.'));
-    }
-    cb(null, true);
-  }
-});
+// Azure Blob Storage configuration
+const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
+const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_STORAGE_CONTAINER_NAME);
+
+// Generate SAS token
+const generateSASToken = (blobName) => {
+  const sasOptions = {
+    containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+    blobName: blobName,
+    permissions: BlobSASPermissions.parse("r"),
+    startsOn: new Date(),
+    expiresOn: new Date(new Date().valueOf() + 3600 * 1000), // 1 hour
+  };
+  return generateBlobSASQueryParameters(sasOptions, blobServiceClient.credential).toString();
+};
 
 // Upload profile picture
 router.post('/upload-profile-picture', verifyToken, upload.single('profilePicture'), async (req, res) => {
   try {
-    console.log('File received:', req.file);
     const hrPartner = await HRPartner.findById(req.user.id);
     if (!hrPartner) {
       return res.status(404).json({ message: 'HR Partner not found' });
     }
 
-    const profilePictureUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-    console.log('Profile picture URL:', profilePictureUrl);
+    const blobName = `${req.user.id}-${uuidv4()}${path.extname(req.file.originalname)}`;
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+    await blockBlobClient.upload(req.file.buffer, req.file.size, {
+      blobHTTPHeaders: { blobContentType: req.file.mimetype }
+    });
+
+    const sasToken = generateSASToken(blobName);
+    const profilePictureUrl = `${blockBlobClient.url}?${sasToken}`;
     hrPartner.profilePicture = profilePictureUrl;
     await hrPartner.save();
 

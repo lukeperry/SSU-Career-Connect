@@ -1,4 +1,4 @@
-name: Deploy to Azure
+name: SSU Career Connect - BACKEND
 
 on:
   push:

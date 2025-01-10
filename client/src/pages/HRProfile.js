@@ -39,14 +39,13 @@ const HRProfile = () => {
     formData.append("profilePicture", profilePicture);
 
     try {
-      console.log('Uploading picture:', profilePicture);
       const response = await axios.post(`${process.env.REACT_APP_API_ADDRESS}/api/hr/upload-profile-picture`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
-      console.log('Upload response:', response.data);
+      // Update the profile picture URL in the frontend state
       setHrDetails({ ...hrDetails, profilePicture: response.data.profilePicture });
       setModalIsOpen(false);
       setPreview(null);
