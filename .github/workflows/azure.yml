@@ -1,4 +1,4 @@
-name: SSU Career Connect Azure Deployment
+name: Deploy to Azure
 
 on:
   push:
@@ -33,7 +33,8 @@ jobs:
 
   deploy_frontend:
     runs-on: ubuntu-latest
-   steps:
+
+    steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -56,10 +57,10 @@ jobs:
           yarn install --frozen-lockfile
           yarn build --verbose  # Build with verbose logging
 
-      - name: Deploy to Azure
+      - name: Deploy to Azure App Service (Frontend)
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ssucareerconnect  
+          app-name: ssucareerconnect-frontend
           slot-name: production
           publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
-          package: ./client  # Deploy entire 'client' folder
+          package: ./client/build
