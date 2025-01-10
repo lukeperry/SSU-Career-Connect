@@ -45,5 +45,7 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "serve": "^14.0.1"
+  }
 }
