@@ -56,7 +56,7 @@ jobs:
           app_location: "./client" # App source code path
           api_location: "" # Api source code path - optional
           output_location: "build" # Built app content directory - optional
-          configuration_file_location: "./client/staticwebapp.config.json" # Configuration file path
+#          configuration_file_location: "./client/staticwebapp.config.json" # Configuration file path
         env:
           REACT_APP_API_ADDRESS: "https://ssucareerconnect-backend.azurewebsites.net"
           ###### End of Repository/Build Configurations ######
