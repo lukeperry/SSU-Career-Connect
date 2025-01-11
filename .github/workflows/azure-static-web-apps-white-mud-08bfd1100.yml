@@ -1,4 +1,5 @@
 name: SSU Career Connect - BACKEND
+
   on:
     push:
       branches:
@@ -30,6 +31,7 @@ name: SSU Career Connect - BACKEND
             package: ./server
 
 name: SSU Career Connect - FRONTEND
+
   on:
     push:
       branches:
