@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from 'react-modal';
 import '../css/Profile.css'; // Import the CSS file for styling
+import { useNavigate } from 'react-router-dom';
 
 const HRProfile = () => {
   const [hrDetails, setHrDetails] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
   const [preview, setPreview] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -19,10 +22,14 @@ const HRProfile = () => {
         setHrDetails(response.data);
       } catch (error) {
         console.error("Error fetching profile:", error);
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/hr/login");
+        }
       }
     };
     fetchProfile();
-  }, []);
+  }, [navigate]);
 
   const handlePictureChange = (e) => {
     const file = e.target.files[0];
@@ -49,8 +56,15 @@ const HRProfile = () => {
       setHrDetails({ ...hrDetails, profilePicture: response.data.profilePicture });
       setModalIsOpen(false);
       setPreview(null);
+      setMessage("Profile picture updated successfully!");
     } catch (error) {
       console.error("Error uploading profile picture:", error);
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/hr/login");
+      } else {
+        setMessage("Failed to update profile picture. Please try again.");
+      }
     }
   };
 
@@ -93,6 +107,7 @@ const HRProfile = () => {
         <button onClick={handlePictureUpload}>Upload Picture</button>
         <button onClick={() => setModalIsOpen(false)}>Cancel</button>
       </Modal>
+      {message && <p className="message">{message}</p>}
       <div className="profile-details">
         <div className="profile-box">
           <strong>Username:</strong>
