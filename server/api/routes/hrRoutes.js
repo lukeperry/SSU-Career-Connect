@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { BlobServiceClient } = require('@azure/storage-blob');
+const { BlobServiceClient, generateBlobSASQueryParameters, BlobSASPermissions } = require('@azure/storage-blob');
 const { verifyToken } = require('../../utils/authMiddleware');
 const HRPartner = require('../models/hrPartner');
 const { v4: uuidv4 } = require('uuid');
@@ -15,6 +15,18 @@ const upload = multer({ storage });
 // Azure Blob Storage configuration
 const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
 const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_STORAGE_CONTAINER_NAME);
+
+// Generate SAS token
+const generateSASToken = (blobName) => {
+  const sasOptions = {
+    containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+    blobName: blobName,
+    permissions: BlobSASPermissions.parse("r"),
+    startsOn: new Date(),
+    expiresOn: new Date(new Date().valueOf() + 3600 * 1000), // 1 hour
+  };
+  return generateBlobSASQueryParameters(sasOptions, blobServiceClient.credential).toString();
+};
 
 // Upload profile picture
 router.post('/upload-profile-picture', verifyToken, upload.single('profilePicture'), async (req, res) => {
@@ -31,7 +43,8 @@ router.post('/upload-profile-picture', verifyToken, upload.single('profilePictur
       blobHTTPHeaders: { blobContentType: req.file.mimetype }
     });
 
-    const profilePictureUrl = blockBlobClient.url;
+    const sasToken = generateSASToken(blobName);
+    const profilePictureUrl = `${blockBlobClient.url}?${sasToken}`;
     hrPartner.profilePicture = profilePictureUrl;
     await hrPartner.save();
 
