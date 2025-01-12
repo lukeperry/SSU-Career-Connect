@@ -19,6 +19,7 @@ const HREditJob = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false); // For disabling the button
   const [message, setMessage] = useState('');
+  const [error, setError] = useState(''); // Add error state
   const navigate = useNavigate(); // Use useNavigate instead of useHistory
 
   useEffect(() => {
@@ -41,13 +42,36 @@ const HREditJob = () => {
           companyName: job.companyName,
         });
       } catch (error) {
-        console.error('Error fetching job:', error);
+        setError('Error fetching job:');
       }
     };
 
     fetchJob();
   }, [id]);
 
+  const deleteJob = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate('/');
+      return;
+    }
+    try {
+      await axios.delete(
+        `${process.env.REACT_APP_API_ADDRESS}/api/jobs/${id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      navigate('/hr/jobs'); // Redirect to the jobs list after deleting the job
+    } catch (error) {
+      setError("Failed to delete job.");
+      console.error("Error deleting job:", error.response ? error.response.data : error.message); // Log the error for debugging
+    }
+  };
+  
   // Handle form changes for general input fields
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,20 +84,16 @@ const HREditJob = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-
     if (!token) {
       navigate('/');
       return;
     }
-
     if (formData.requiredSkills.length === 0) {
       setMessage("Please enter required skills.");
       return;
     }
-
     setIsSubmitting(true);
     setMessage("Updating job...");
-
     setTimeout(async () => {
       try {
         console.log('Updating job with data:', formData); // Log the form data
@@ -179,8 +199,8 @@ const HREditJob = () => {
         >
           {isSubmitting ? 'Updating...' : 'Update Job'}
         </button>
+        <button type="button" onClick={deleteJob} className="btn btn-danger">Delete Job</button> {/* Add delete button */}
       </form>
-
       {message && <div className="announcement">{message}</div>}
     </div>
   );

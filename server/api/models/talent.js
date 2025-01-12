@@ -1,19 +1,23 @@
 // api/models/talent.js
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-const graduateSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+const talentSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true }, // Add username field
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  birthday: { type: Date, required: true },
+  gender: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  skills: { type: [String], required: true },  // List of skills
-  resume: { type: String },  // CV or Resume link/file
-  certificates: { type: [String] },  // Array of certificate links
-  appliedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Job' }],  // Jobs the graduate has applied to
+  phoneNumber: { type: String, required: true },
+  password: { type: String, required: true },
+  profilePicture: { type: String }, // Add this field
   createdAt: { type: Date, default: Date.now },
 });
 
 // Method to compare password
-graduateSchema.methods.matchPassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
-  };
-module.exports = mongoose.model('Talent', graduateSchema);
+talentSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+module.exports = mongoose.model('Talent', talentSchema);

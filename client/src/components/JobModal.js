@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/JobModal.css'; // Import the CSS file for styling the modal
 
-const JobModal = ({ job, onClose }) => {
+const JobModal = ({ job, onClose, onDelete }) => {
   const navigate = useNavigate();
 
   const handleUpdate = () => {
@@ -21,6 +21,7 @@ const JobModal = ({ job, onClose }) => {
         <p><strong>Required Skills:</strong> {job.requiredSkills.join(', ')}</p>
         <button onClick={onClose} className="btn btn-secondary">Close</button>
         <button onClick={handleUpdate} className="btn btn-primary">Update</button>
+        <button onClick={onDelete} className="btn btn-danger">Delete</button> {/* Add delete button */}
       </div>
     </div>
   );

@@ -6,7 +6,6 @@ console.log('MIDDLEWARE JWT_SECRET_KEY:', JWT_SECRET_KEY); // Add this line to l
 // Middleware to verify JWT token and extract user role
 const verifyToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1]; // Get token from 'Authorization' header
-
   if (!token) {
     return res.status(403).json({ message: 'No token provided' });
   }

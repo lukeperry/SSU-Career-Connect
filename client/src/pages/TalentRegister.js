@@ -5,12 +5,15 @@ import '../css/LandingPage.css'; // Import the CSS file for styling
 
 const TalentRegister = () => {
   const [formData, setFormData] = useState({
+    username: "", // Add username field
     firstName: "",
     lastName: "",
     birthday: "",
     gender: "",
     email: "",
     phoneNumber: "",
+    password: "", // Add password field
+    confirmPassword: "", // Add confirm password field
   });
 
   const [message, setMessage] = useState("");
@@ -23,17 +26,24 @@ const TalentRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      setMessage("Passwords do not match.");
+      return;
+    }
     try {
-      const response = await axios.post("/api/auth/register/talent", formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_ADDRESS}/api/auth/register/talent`, formData);
       console.log(response.data); // Optional: Log or process the response
       setMessage("Registration successful! Please log in.");
       setFormData({
+        username: "", // Reset username field
         firstName: "",
         lastName: "",
         birthday: "",
         gender: "",
         email: "",
         phoneNumber: "",
+        password: "", // Reset password field
+        confirmPassword: "", // Reset confirm password field
       });
       navigate("/talent/login");
     } catch (error) {
@@ -47,6 +57,17 @@ const TalentRegister = () => {
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-bold mb-4">Talent Registration</h2>
         {message && <p className="text-red-500 mb-4">{message}</p>}
+        <div className="mb-4">
+          <label className="block mb-1 font-bold">Username</label>
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded"
+          />
+        </div>
         <div className="mb-4">
           <label className="block mb-1 font-bold">First Name</label>
           <input
@@ -112,6 +133,28 @@ const TalentRegister = () => {
             type="tel"
             name="phoneNumber"
             value={formData.phoneNumber}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-1 font-bold">Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-1 font-bold">Confirm Password</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
             onChange={handleChange}
             required
             className="w-full p-2 border rounded"

@@ -1,13 +1,13 @@
 // routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
-//const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const { verifyToken } = require('../../utils/authMiddleware');
 const { generateToken } = require('../../utils/jwt');
 const jwt = require('jsonwebtoken');
 const Talent = require('../models/talent');
 const HRPartner = require('../models/hrPartner');
+const { validationResult } = require('express-validator');
 
 // Placeholder route for testing
 router.get('/test', (req, res) => {
@@ -15,56 +15,82 @@ router.get('/test', (req, res) => {
 });
 
 // Register a talent
-  router.post('/register/talent', async (req, res) => {
-    const { username, email, password, skills } = req.body;
+router.post('/register/talent', async (req, res) => {
+  const { username, firstName, lastName, birthday, gender, email, phoneNumber, password } = req.body;
 
   // Check for missing fields
-  if (!username || !password || !email) {
-    return res.status(400).json({ message: 'Please type a username, email, and a password' });
-  }
-
-   // Validate username (no whitespace and minimum length of 3 characters)
-   if (/\s/.test(username) || username.length < 3) {
-    return res.status(400).json({ message: 'Username cannot contain spaces and must be at least 3 characters' });
-  }
-
-  // Validate password (no whitespace and minimum length of 8 characters)
-  if (/\s/.test(password) || password.length < 8) {
-    return res.status(400).json({ message: 'Password cannot contain spaces and must be at least 8 characters' });
-  }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: 'Please provide a valid email address' });
+  if (!username || !firstName || !lastName || !birthday || !gender || !email || !phoneNumber || !password) {
+    return res.status(400).json({ message: 'Please provide all required fields' });
   }
 
   try {
     // Check if the talent exists
-    const talentExists = await Talent.findOne({ username });
     const emailExists = await Talent.findOne({ email });
-    if (talentExists) {
-      return res.status(400).json({ message: 'Username is already taken' });
-    }
     if (emailExists) {
       return res.status(400).json({ message: 'Email is already registered' });
+    }
+
+    const usernameExists = await Talent.findOne({ username });
+    if (usernameExists) {
+      return res.status(400).json({ message: 'Username is already taken' });
     }
 
     // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create a new user with hashed password
+    // Create a new talent with hashed password
     const newTalent = new Talent({
       username,
+      firstName,
+      lastName,
+      birthday,
+      gender,
       email,
+      phoneNumber,
       password: hashedPassword,
-      skills,
     });
     await newTalent.save();
 
     res.status(201).json({ message: 'Talent registered successfully' });
   } catch (error) {
     console.error('Error during registration:', error);
-    res.status(500).json({ message: 'Server error', error });
+    res.status(500).json({ message: 'Server error possible', error });
+  }
+});
+
+// Update talent profile
+router.put('/profile', verifyToken, async (req, res) => {
+  const { username, email } = req.body;
+  try {
+    console.log('Received request to update profile:', req.body);
+
+    const existingUser = await Talent.findOne({ $or: [{ username }, { email }] });
+    console.log('Existing user:', existingUser);
+
+    if (existingUser && existingUser._id.toString() !== req.user.id) {
+      console.log('Username or email already taken');
+      return res.status(400).json({ message: 'Username or email already taken' });
+    }
+
+    const talent = await Talent.findById(req.user.id);
+    console.log('Talent found:', talent);
+
+    if (!talent) {
+      console.log('Talent not found');
+      return res.status(404).json({ message: 'Talent not found' });
+    }
+
+    talent.username = username;
+    talent.email = email;
+    // Update other fields as needed
+
+    await talent.save();
+    console.log('Profile updated successfully');
+    res.json({ message: 'Profile updated successfully' });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ message: 'Server error: possible existing username or email' });
   }
 });
 
@@ -191,6 +217,20 @@ router.post('/login/hr', async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 });
+
+// Get talent dashboard data
+router.get('/dashboard/talent', verifyToken, async (req, res) => {
+  try {
+    const talent = await Talent.findById(req.user.id).select('firstName email');
+    if (!talent) {
+      return res.status(404).json({ message: 'Talent not found' });
+    }
+    res.json(talent);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 // Middleware to verify token and role
 router.get('/protected', verifyToken, (req, res) => {

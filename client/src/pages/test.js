@@ -12,11 +12,10 @@ const HRPostedJobs = () => {
 
   useEffect(() => {
     const fetchJobs = async () => {
+      const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/jobs`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
+        const response = await axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/hr/jobs`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
         const companyName = localStorage.getItem('companyName'); // Fetch HR's company from localStorage
         const filteredJobs = response.data.jobs.filter(job => job.companyName === companyName);
@@ -38,6 +37,19 @@ const HRPostedJobs = () => {
 
   const closeModal = () => {
     setSelectedJob(null);
+  };
+
+  const deleteJob = async (jobId) => {
+    const token = localStorage.getItem("token");
+    try {
+      await axios.delete(`${process.env.REACT_APP_API_ADDRESS}/api/hr/jobs/${jobId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setJobs(jobs.filter((job) => job._id !== jobId));
+      closeModal(); // Close the modal after deleting the job
+    } catch (error) {
+      setError("Failed to delete job.");
+    }
   };
 
   if (loading) {
@@ -66,7 +78,7 @@ const HRPostedJobs = () => {
         )}
       </div>
       {selectedJob && (
-        <JobModal job={selectedJob} onClose={closeModal} />
+        <JobModal job={selectedJob} onClose={closeModal} onDelete={() => deleteJob(selectedJob._id)} />
       )}
     </div>
   );

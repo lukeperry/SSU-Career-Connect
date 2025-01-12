@@ -58,7 +58,7 @@ const HRProfile = () => {
 
   return (
     <div className="profile-container">
-      <h2 className="profile-title">Profile</h2>
+      <h2 className="profile-title">HR Profile</h2>
       <div className="profile-picture-container">
         <img
           src={hrDetails.profilePicture} // Ensure the URL is correct

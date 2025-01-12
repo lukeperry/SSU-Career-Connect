@@ -1,0 +1,38 @@
+.dashboard-container {
+  padding: 20px;
+  text-align: center;
+}
+
+.greeting-container {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.greeting-text {
+  font-size: 1.5rem; /* Increase text size */
+}
+
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.card {
+  border: 2px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.card-content {
+  font-size: 1rem;
+}
