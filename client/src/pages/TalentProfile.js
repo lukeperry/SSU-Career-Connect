@@ -61,7 +61,7 @@ const TalentProfile = () => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.put(`${process.env.REACT_APP_API_ADDRESS}/api/talent/profile`, talentDetails, {
+      await axios.put(`${process.env.REACT_APP_API_ADDRESS}/api/talent/profile`, talentDetails, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessage("Profile updated successfully!");

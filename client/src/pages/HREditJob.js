@@ -19,7 +19,7 @@ const HREditJob = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false); // For disabling the button
   const [message, setMessage] = useState('');
-  const [error, setError] = useState(''); // Add error state
+  const [error, setError] = useState(''); // Define the error state
   const navigate = useNavigate(); // Use useNavigate instead of useHistory
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const HREditJob = () => {
           location: job.location,
           companyName: job.companyName,
         });
-      } catch (error) {
+      } catch (err) { // Change 'error' to 'err'
         setError('Error fetching job:');
       }
     };
@@ -66,9 +66,9 @@ const HREditJob = () => {
         }
       );
       navigate('/hr/jobs'); // Redirect to the jobs list after deleting the job
-    } catch (error) {
+    } catch (err) { // Change 'error' to 'err'
       setError("Failed to delete job.");
-      console.error("Error deleting job:", error.response ? error.response.data : error.message); // Log the error for debugging
+      console.error("Error deleting job:", err.response ? err.response.data : err.message); // Log the error for debugging
     }
   };
   
@@ -109,9 +109,9 @@ const HREditJob = () => {
         console.log('Server response:', response.data); // Log the server response
         setMessage(response.data.message || "Job updated successfully!");
         navigate('/hr/posted-jobs'); // Redirect to posted jobs page after successful update
-      } catch (error) {
-        console.error('Error updating job:', error.response.data); // Log the error response
-        if (error.response.status === 401) {
+      } catch (err) { // Change 'error' to 'err'
+        console.error('Error updating job:', err.response.data); // Log the error response
+        if (err.response.status === 401) {
           navigate('/');
         } else {
           setMessage("Failed to update job. Please try again.");
@@ -202,6 +202,7 @@ const HREditJob = () => {
         <button type="button" onClick={deleteJob} className="btn btn-danger">Delete Job</button> {/* Add delete button */}
       </form>
       {message && <div className="announcement">{message}</div>}
+      {error && <p>{error}</p>} {""}
     </div>
   );
 };
