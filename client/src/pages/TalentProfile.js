@@ -2,9 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from 'react-modal';
 import '../css/Profile.css'; // Import the CSS file for styling
+import { WithContext as ReactTags } from 'react-tag-input'; // Import the ReactTags component
+import { predefinedSkills } from '../components/skillsList'; // Import predefined skills
 
 const TalentProfile = () => {
-  const [talentDetails, setTalentDetails] = useState(null);
+  const [talentDetails, setTalentDetails] = useState({
+    skills: [] // Ensure skills is always an array
+  });
   const [profilePicture, setProfilePicture] = useState(null);
   const [preview, setPreview] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -19,7 +23,9 @@ const TalentProfile = () => {
         const response = await axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/talent/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setTalentDetails(response.data);
+        const data = response.data;
+        data.skills = data.skills || []; // Ensure skills is always an array
+        setTalentDetails(data);
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -148,6 +154,31 @@ const TalentProfile = () => {
           <strong>Phone Number:</strong>
           <p>{talentDetails.phoneNumber}</p>
         </div>
+        <div className="profile-box">
+          <strong>Location:</strong>
+          <p>{talentDetails.location}</p>
+        </div>
+        <div className="profile-box">
+          <strong>Experience:</strong>
+          <p>{talentDetails.experience}</p>
+        </div>
+        <div className="profile-box">
+          <strong>Skills:</strong>
+          <ReactTags
+            tags={talentDetails.skills ? talentDetails.skills.map((skill) => ({ id: skill, text: skill })) : []} // Map skills to tags
+            suggestions={predefinedSkills.map((skill) => ({ id: skill, text: skill }))} // Use predefined suggestions
+            handleDelete={(index) => {
+              const newSkills = [...talentDetails.skills];
+              newSkills.splice(index, 1); // Remove skill tag
+              setTalentDetails({ ...talentDetails, skills: newSkills });
+            }}
+            handleAddition={(newTag) => {
+              setTalentDetails({ ...talentDetails, skills: [...talentDetails.skills, newTag.text] }); // Add new skill
+            }}
+            inputFieldPosition="bottom" // Position of the input field
+            autocomplete // Enable autocomplete for the input
+          />
+        </div>
       </div>
       <button type="button" className="btn btn-primary" onClick={() => setEditModalIsOpen(true)}>
         Update Profile
@@ -265,6 +296,50 @@ const TalentProfile = () => {
                 onChange={(e) => setTalentDetails({ ...talentDetails, phoneNumber: e.target.value })}
                 required
                 className="form-control"
+              />
+            </div>
+          </div>
+          <div className="profile-box">
+            <div className="form-group">
+              <label className="bold-label">Location: </label>
+              <input
+                type="text"
+                name="location"
+                value={talentDetails.location}
+                onChange={(e) => setTalentDetails({ ...talentDetails, location: e.target.value })}
+                required
+                className="form-control"
+              />
+            </div>
+          </div>
+          <div className="profile-box">
+            <div className="form-group">
+              <label className="bold-label">Experience: </label>
+              <textarea
+                name="experience"
+                value={talentDetails.experience}
+                onChange={(e) => setTalentDetails({ ...talentDetails, experience: e.target.value })}
+                required
+                className="form-control"
+              />
+            </div>
+          </div>
+          <div className="profile-box">
+            <div className="form-group">
+              <label className="bold-label">Skills: </label>
+              <ReactTags
+                tags={talentDetails.skills ? talentDetails.skills.map((skill) => ({ id: skill, text: skill })) : []} // Map skills to tags
+                suggestions={predefinedSkills.map((skill) => ({ id: skill, text: skill }))} // Use predefined suggestions
+                handleDelete={(index) => {
+                  const newSkills = [...talentDetails.skills];
+                  newSkills.splice(index, 1); // Remove skill tag
+                  setTalentDetails({ ...talentDetails, skills: newSkills });
+                }}
+                handleAddition={(newTag) => {
+                  setTalentDetails({ ...talentDetails, skills: [...talentDetails.skills, newTag.text] }); // Add new skill
+                }}
+                inputFieldPosition="bottom" // Position of the input field
+                autocomplete // Enable autocomplete for the input
               />
             </div>
           </div>

@@ -30,6 +30,7 @@ const applicationRoutes = require('./api/routes/applicationRoute');  // Import t
 const dashboardRoutes = require('./api/routes/dashboardRoutes');
 const hrRoutes = require('./api/routes/hrRoutes'); // Import HR routes
 const talentRoutes = require('./api/routes/talentRoutes'); // Import Talent routes
+const matchRoutes = require('./api/routes/matchRoutes'); // Import Match routes
 
 // Use routes
 app.use('/api/auth', authRoutes);  // Auth-related routes like login, register
@@ -39,6 +40,7 @@ app.use('/api/application', applicationRoutes); // Application routes for talent
 app.use('/api/dashboard', dashboardRoutes); // Dashboard routes for talents and HRs
 app.use('/api/hr', hrRoutes); // Use HR routes
 app.use('/api/talent', talentRoutes); // Use Talent routes
+app.use('/api/match', matchRoutes); // Use Match routes
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
