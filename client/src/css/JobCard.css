@@ -18,3 +18,15 @@
 .job-card p {
   margin: 8px 0;
 }
+
+.match-score {
+  font-weight: bold;
+}
+
+.high-score {
+  color: green;
+}
+
+.low-score {
+  color: red;
+}

@@ -96,3 +96,9 @@
     opacity: 1;
   }
 }
+
+.recommended-jobs-title {
+  text-align: center;
+  font-size: 2em;
+  margin-bottom: 20px;
+}

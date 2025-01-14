@@ -26,6 +26,14 @@ jobs:
         run: |
           cd server
           yarn install --frozen-lockfile
+      
+      - name: Install TensorFlow dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+            libglib2.0-0 \
+            libsm6 \
+            libxext6 \
+            libxrender-dev
 
       - name: Deploy to Azure App Service (Backend)
         uses: azure/webapps-deploy@v2

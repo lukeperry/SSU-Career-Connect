@@ -5,6 +5,14 @@ import PropTypes from 'prop-types'; // For type checking
 import '../css/JobCard.css'; // Assuming you have a CSS file for styling
 
 const JobCard = ({ job, score, onClick }) => {
+  const getScoreClass = (score) => {
+    if (score >= 0.75) {
+      return 'high-score';
+    } else {
+      return 'low-score';
+    }
+  };
+
   return (
     <div className="job-card" onClick={onClick}>
       <h3>{job.title}</h3>
@@ -13,7 +21,7 @@ const JobCard = ({ job, score, onClick }) => {
       <p><strong>Location:</strong> {job.location}</p>
       <p><strong>Salary:</strong> {job.salary || 'Not specified'}</p>
       {score !== undefined && (
-        <p><strong>Match Score:</strong> {Math.round(score * 100)}%</p>
+        <p className={getScoreClass(score)}><strong>Match Score:</strong> {Math.round(score * 100)}%</p>
       )}
     </div>
   );

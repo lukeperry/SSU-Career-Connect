@@ -118,7 +118,7 @@ const TalentJobBoard = () => {
           </div>
         ) : (
           <div>
-            <h2>Recommended Jobs</h2>
+            <h2 className="recommended-jobs-title">Recommended Jobs</h2>
             {recommendedJobs.length === 0 ? (
               <p>No recommended jobs found.</p>
             ) : (
