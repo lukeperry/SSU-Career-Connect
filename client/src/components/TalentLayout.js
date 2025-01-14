@@ -10,6 +10,7 @@ const TalentLayout = ({ children }) => {
           <li><Link to="/talent/dashboard">Home</Link></li>
           <li><Link to="/talent/profile">Profile</Link></li>
           <li><Link to="/talent/job-board">Job Board</Link></li>
+          <li><Link to="/talent/submitted-jobs">Submitted Jobs</Link></li>
           <li><Link to="/talent/messages">Messages</Link></li>
           <li><Link to="/" onClick={() => { localStorage.clear() }}>Logout</Link></li>
         </ul>

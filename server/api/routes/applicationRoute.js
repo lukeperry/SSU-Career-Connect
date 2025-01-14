@@ -89,7 +89,16 @@ router.put('/:id/status', verifyToken, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
+// Get all submitted applications for the logged-in talent
+router.get('/submitted', verifyToken, async (req, res) => {
+  try {
+    const applications = await Application.find({ talentId: req.user.id }).populate('jobId', 'title companyName description location requirements requiredSkills');
+    res.status(200).json({ applications });
+  } catch (err) {
+    console.error('Error fetching submitted applications:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 // Get a specific application by ID
 router.get('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
