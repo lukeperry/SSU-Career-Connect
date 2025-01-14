@@ -164,20 +164,7 @@ const TalentProfile = () => {
         </div>
         <div className="profile-box">
           <strong>Skills:</strong>
-          <ReactTags
-            tags={talentDetails.skills ? talentDetails.skills.map((skill) => ({ id: skill, text: skill })) : []} // Map skills to tags
-            suggestions={predefinedSkills.map((skill) => ({ id: skill, text: skill }))} // Use predefined suggestions
-            handleDelete={(index) => {
-              const newSkills = [...talentDetails.skills];
-              newSkills.splice(index, 1); // Remove skill tag
-              setTalentDetails({ ...talentDetails, skills: newSkills });
-            }}
-            handleAddition={(newTag) => {
-              setTalentDetails({ ...talentDetails, skills: [...talentDetails.skills, newTag.text] }); // Add new skill
-            }}
-            inputFieldPosition="bottom" // Position of the input field
-            autocomplete // Enable autocomplete for the input
-          />
+          <p>{talentDetails.skills.join(', ')}</p>
         </div>
       </div>
       <button type="button" className="btn btn-primary" onClick={() => setEditModalIsOpen(true)}>
@@ -315,7 +302,8 @@ const TalentProfile = () => {
           <div className="profile-box">
             <div className="form-group">
               <label className="bold-label">Experience: </label>
-              <textarea
+              <input
+                type="text"
                 name="experience"
                 value={talentDetails.experience}
                 onChange={(e) => setTalentDetails({ ...talentDetails, experience: e.target.value })}
@@ -325,21 +313,21 @@ const TalentProfile = () => {
             </div>
           </div>
           <div className="profile-box">
-            <div className="form-group">
+          <div className="form-group">
               <label className="bold-label">Skills: </label>
               <ReactTags
-                tags={talentDetails.skills ? talentDetails.skills.map((skill) => ({ id: skill, text: skill })) : []} // Map skills to tags
-                suggestions={predefinedSkills.map((skill) => ({ id: skill, text: skill }))} // Use predefined suggestions
+                tags={talentDetails.skills.map((skill) => ({ id: skill, text: skill }))}
+                suggestions={predefinedSkills.map((skill) => ({ id: skill, text: skill }))}
                 handleDelete={(index) => {
                   const newSkills = [...talentDetails.skills];
-                  newSkills.splice(index, 1); // Remove skill tag
+                  newSkills.splice(index, 1);
                   setTalentDetails({ ...talentDetails, skills: newSkills });
                 }}
                 handleAddition={(newTag) => {
-                  setTalentDetails({ ...talentDetails, skills: [...talentDetails.skills, newTag.text] }); // Add new skill
+                  setTalentDetails({ ...talentDetails, skills: [...talentDetails.skills, newTag.text] });
                 }}
-                inputFieldPosition="bottom" // Position of the input field
-                autocomplete // Enable autocomplete for the input
+                inputFieldPosition="bottom"
+                autocomplete
               />
             </div>
           </div>

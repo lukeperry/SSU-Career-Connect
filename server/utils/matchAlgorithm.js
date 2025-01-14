@@ -14,14 +14,14 @@ async function loadModel() {
 async function computeEmbeddings(documents) {
   await loadModel();
   const embeddings = await model.embed(documents);
-  return embeddings;
+  return embeddings.arraySync(); // Ensure embeddings are returned as an array
 }
 
 function cosineSimilarity(a, b) {
   const dotProduct = tf.sum(tf.mul(a, b));
   const normA = tf.norm(a);
   const normB = tf.norm(b);
-  return dotProduct.div(normA.mul(normB));
+  return dotProduct.div(normA.mul(normB)).dataSync()[0];
 }
 
 function normalizeText(text) {
@@ -49,47 +49,66 @@ async function lemmatizeText(text) {
 }
 
 async function calculateMatchScore(job, candidate) {
-  // Log the entire candidate object
-  console.log('Candidate Object:', candidate);
-
-  // Ensure candidate object has the expected structure
-  const candidateExperience = candidate.experience || '';  // Fallback to empty string if undefined
-  const candidateSkillsArray = candidate.skills || [];  // Fallback to empty array if undefined
-
-  console.log('Raw Candidate Experience:', candidateExperience);
-  console.log('Raw Candidate Skills:', candidateSkillsArray);
-
-  // Comment out the rest of the algorithm for now
-  /*
-  // Normalize and lemmatize experience and skills without removing stopwords
-  const processedCandidateExperience = await lemmatizeText(normalizeText(candidateExperience));
-  const processedCandidateSkills = await lemmatizeText(normalizeText(candidateSkillsArray.join(' ')));
-
-  // Log intermediate results for debugging
-  console.log('Processed Candidate Experience:', processedCandidateExperience);
-  console.log('Processed Candidate Skills:', processedCandidateSkills);
-
-  const combinedCandidateText = processedCandidateExperience + ' ' + processedCandidateSkills;
-
-  console.log('Combined Candidate Text:', combinedCandidateText);
-
   try {
-    const embeddings = await computeEmbeddings([combinedCandidateText]);
-    const embeddingsArray = embeddings.arraySync();
-    const candidateEmbedding = embeddingsArray[0];
+    // Log the entire candidate object
+    console.log('Candidate Object:', candidate);
 
-    const similarity = cosineSimilarity(tf.tensor(candidateEmbedding), tf.tensor(candidateEmbedding));
-    const score = similarity.arraySync();
-    console.log('Similarity Score:', score);
-    return parseFloat(score.toFixed(2)); // Round the score to 2 decimal places
+    // Ensure candidate object has the expected structure
+    const candidateExperience = candidate.experience || '';  // Fallback to empty string if undefined
+    const candidateSkillsArray = candidate.skills || [];  // Fallback to empty array if undefined
+
+    console.log('Raw Candidate Experience:', candidateExperience);
+    console.log('Raw Candidate Skills:', candidateSkillsArray);
+
+    // Normalize, remove stopwords, and lemmatize experience and skills
+    const processedCandidateExperience = await lemmatizeText(removeStopwords(normalizeText(candidateExperience)));
+    const processedCandidateSkills = await lemmatizeText(removeStopwords(normalizeText(candidateSkillsArray.join(' '))));
+
+    // Log intermediate results for debugging
+    console.log('Processed Candidate Experience:', processedCandidateExperience);
+    console.log('Processed Candidate Skills:', processedCandidateSkills);
+
+    // Example match score calculation (this can be replaced with a more complex algorithm)
+    const jobDescription = job.description || '';
+    const jobSkills = job.requiredSkills || [];
+
+    const processedJobDescription = await lemmatizeText(removeStopwords(normalizeText(jobDescription)));
+    const processedJobSkills = await lemmatizeText(removeStopwords(normalizeText(jobSkills.join(' '))));
+
+    console.log('Processed Job Description:', processedJobDescription);
+    console.log('Processed Job Skills:', processedJobSkills);
+
+    // Compute embeddings
+    const candidateText = `${processedCandidateExperience} ${processedCandidateSkills}`;
+    const jobText = `${processedJobDescription} ${processedJobSkills}`;
+    const embeddings = await computeEmbeddings([candidateText, jobText]);
+
+    // Ensure embeddings are returned as an array
+    if (!Array.isArray(embeddings) || embeddings.length !== 2) {
+      throw new Error('Embeddings computation failed');
+    }
+
+    const [candidateEmbedding, jobEmbedding] = embeddings;
+
+    // Calculate cosine similarity
+    const matchScore = cosineSimilarity(candidateEmbedding, jobEmbedding);
+
+    // Apply a minimum score threshold
+    const MIN_SCORE_THRESHOLD = 0.3;
+    if (matchScore < MIN_SCORE_THRESHOLD) {
+      return 0; // Discard jobs with a score below the threshold
+    }
+
+    // Apply weighting factors (example: 70% skills, 30% experience)
+    const skillsWeight = 0.7;
+    const experienceWeight = 0.3;
+    const weightedScore = (matchScore * skillsWeight) + (matchScore * experienceWeight);
+
+    return weightedScore;
   } catch (error) {
-    console.error('Error calculating match score:', error);
-    return 0; // Return a default score in case of error
+    console.error('Error in calculateMatchScore:', error);
+    throw error;
   }
-  */
-  return 0; // Return a default score for now
 }
 
-module.exports = {
-  calculateMatchScore
-};
+module.exports = { calculateMatchScore };

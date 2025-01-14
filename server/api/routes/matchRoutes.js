@@ -7,42 +7,19 @@ const { verifyToken } = require('../../utils/authMiddleware');
 
 router.get('/matches', verifyToken, async (req, res) => {
   try {
-    console.log('User ID from token:', req.user.id); // Log the user ID from the token
-
     const candidate = await Talent.findById(req.user.id);
-    console.log('Candidate:', candidate); // Log the candidate object
-
     if (!candidate) {
       return res.status(404).json({ message: 'Candidate not found' });
     }
 
-    // Log the candidate's skills and experience
-    console.log('Candidate Skills:', candidate.skills);
-    console.log('Candidate Experience:', candidate.experience);
-
-    // Include the candidate's skills and experience in the response
-    res.json({
-      message: 'Logging candidate skills and experiencee',
-      lastName: candidate.lastName,
-      skills: candidate.skills,
-      experience: candidate.experience,
-      firstName: candidate.firstName
-    });
-
-    // Comment out the rest of the code for now
-    /*
     const jobs = await Job.find();
-    const matches = [];
-
-    for (const job of jobs) {
+    const matchScores = await Promise.all(jobs.map(async (job) => {
       const score = await calculateMatchScore(job, candidate);
-      matches.push({ job, score });
-    }
+      return { job, score };
+    }));
 
-    matches.sort((a, b) => b.score - a.score); // Sort matches by score in descending order
-
-    res.json(matches);
-    */
+    const sortedMatches = matchScores.sort((a, b) => b.score - a.score);
+    res.json(sortedMatches);
   } catch (error) {
     console.error('Error fetching matches:', error);
     res.status(500).json({ message: 'Server error' });
