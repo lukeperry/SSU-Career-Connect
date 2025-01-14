@@ -29,11 +29,11 @@ const generateSASToken = (blobName) => {
 // Get talent profile
 router.get('/profile', verifyToken, async (req, res) => {
   try {
-    const talent = await Talent.findById(req.user.id);
+    const talent = await Talent.findById(req.user.id).select('username firstName lastName birthday gender email phoneNumber location experience skills profilePicture');
     if (!talent) {
       return res.status(404).json({ message: 'Talent not found' });
     }
-    res.json(talent); // Ensure the response is sent only once
+    res.json(talent);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -42,25 +42,12 @@ router.get('/profile', verifyToken, async (req, res) => {
 // Update talent profile
 router.put('/profile', verifyToken, async (req, res) => {
   try {
-    const talent = await Talent.findById(req.user.id);
+    const updatedData = req.body;
+    const talent = await Talent.findByIdAndUpdate(req.user.id, updatedData, { new: true });
     if (!talent) {
       return res.status(404).json({ message: 'Talent not found' });
     }
-
-    const { username, firstName, lastName, birthday, gender, email, phoneNumber, location, experience, skills } = req.body;
-    talent.username = username;
-    talent.firstName = firstName;
-    talent.lastName = lastName;
-    talent.birthday = birthday;
-    talent.gender = gender;
-    talent.email = email;
-    talent.phoneNumber = phoneNumber;
-    talent.location = location;
-    talent.experience = experience;
-    talent.skills = skills;
-
-    await talent.save();
-    res.json({ message: 'Profile updated successfullyy' });
+    res.json(talent);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -96,27 +83,6 @@ router.post('/upload-profile-picture', verifyToken, upload.single('profilePictur
     }
   } catch (error) {
     console.error('Error uploading profile picture:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Update talent profile
-router.put('/profile', verifyToken, async (req, res) => {
-  try {
-    const talent = await Talent.findById(req.user.id);
-    if (!talent) {
-      return res.status(404).json({ message: 'Talent not found' });
-    }
-
-    const { location, experience, skills } = req.body;
-  
-    talent.location = location;
-    talent.experience = experience;
-    talent.skills = skills;
-
-    await talent.save();
-    res.json({ message: 'Profile updated successfullyy' });
-  } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 });

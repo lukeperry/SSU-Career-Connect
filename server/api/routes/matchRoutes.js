@@ -17,8 +17,17 @@ router.get('/matches', verifyToken, async (req, res) => {
     }
 
     // Log the candidate's skills and experience
-    console.log('Candidate Skillss:', candidate.skills);
+    console.log('Candidate Skills:', candidate.skills);
     console.log('Candidate Experience:', candidate.experience);
+
+    // Include the candidate's skills and experience in the response
+    res.json({
+      message: 'Logging candidate skills and experiencee',
+      lastName: candidate.lastName,
+      skills: candidate.skills,
+      experience: candidate.experience,
+      firstName: candidate.firstName
+    });
 
     // Comment out the rest of the code for now
     /*
@@ -34,7 +43,6 @@ router.get('/matches', verifyToken, async (req, res) => {
 
     res.json(matches);
     */
-    res.json({ message: 'Logging candidate skills and experience' });
   } catch (error) {
     console.error('Error fetching matches:', error);
     res.status(500).json({ message: 'Server error' });
