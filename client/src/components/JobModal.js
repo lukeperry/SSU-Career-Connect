@@ -10,6 +10,10 @@ const JobModal = ({ job, onClose, onDelete }) => {
     navigate(`/hr/edit-job/${job._id}`);
   };
 
+  const handleViewApplicants = () => {
+    navigate(`/hr/applicants/${job._id}`);
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -21,7 +25,9 @@ const JobModal = ({ job, onClose, onDelete }) => {
         <p><strong>Required Skills:</strong> {job.requiredSkills.join(', ')}</p>
         <button onClick={onClose} className="btn btn-secondary">Close</button>
         <button onClick={handleUpdate} className="btn btn-primary">Update</button>
+        <button onClick={handleViewApplicants} className="btn btn-primary">View Applicants</button> {/* Add view applicants button */}
         <button onClick={onDelete} className="btn btn-danger">Delete</button> {/* Add delete button */}
+        
       </div>
     </div>
   );

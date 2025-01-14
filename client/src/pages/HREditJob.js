@@ -15,6 +15,7 @@ const HREditJob = () => {
     salary: '',
     location: '',
     companyName: '', // this will be set to the HR's company
+    status: 'open', // Add status field
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false); // For disabling the button
@@ -40,6 +41,7 @@ const HREditJob = () => {
           salary: job.salary,
           location: job.location,
           companyName: job.companyName,
+          status: job.status,
         });
       } catch (err) { // Change 'error' to 'err'
         setError('Error fetching job:');
@@ -191,7 +193,11 @@ const HREditJob = () => {
             autocomplete // Enable autocomplete for the input
           />
         </div>
-
+        <label>Status</label> {/* Add status field */}
+        <select name="status" value={formData.status} onChange={handleChange} required>
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
+        </select>
         <button
           type="submit"
           disabled={isSubmitting}

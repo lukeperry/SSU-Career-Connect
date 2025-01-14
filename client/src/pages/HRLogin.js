@@ -29,6 +29,7 @@ const HRLogin = () => {
       // Save the token or user data to localStorage or context if needed
       localStorage.setItem("token", token);
       localStorage.setItem("companyName", companyName);
+      localStorage.setItem("role", "hr");
       
       // Redirect to HR dashboard after successful login
       navigate("/hr/dashboard");

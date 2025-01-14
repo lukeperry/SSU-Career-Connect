@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 import Modal from 'react-modal';
-import '../css/Profile.css'; // Import the CSS file for styling
-import { WithContext as ReactTags } from 'react-tag-input'; // Import the ReactTags component
-import { predefinedSkills } from '../components/skillsList'; // Import predefined skills
+import '../css/Profile.css';
+import { WithContext as ReactTags } from 'react-tag-input';
+import { predefinedSkills } from '../components/skillsList';
 
 const TalentProfile = () => {
+  const { id } = useParams(); // Get the talent ID from the URL
   const [talentDetails, setTalentDetails] = useState({
-    skills: [] // Ensure skills is always an array
+    skills: []
   });
   const [profilePicture, setProfilePicture] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -15,23 +17,28 @@ const TalentProfile = () => {
   const [editModalIsOpen, setEditModalIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [role, setRole] = useState(""); // State to store the user's role
 
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/talent/profile`, {
+        const url = id 
+          ? `${process.env.REACT_APP_API_ADDRESS}/api/talent/profile/${id}` 
+          : `${process.env.REACT_APP_API_ADDRESS}/api/talent/profile`;
+        const response = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = response.data;
-        data.skills = data.skills || []; // Ensure skills is always an array
+        data.skills = data.skills || [];
         setTalentDetails(data);
+        setRole(localStorage.getItem("role")); // Get the user's role from localStorage
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
     };
     fetchProfile();
-  }, []);
+  }, [id]);
 
   const handlePictureChange = (e) => {
     const file = e.target.files[0];
@@ -91,18 +98,26 @@ const TalentProfile = () => {
       <h1 className="profile-title">Talent Profile</h1>
       {message && <div className="success-message">{message}</div>}
       {error && <p className="error">{error}</p>}
-      <div className="profile-picture-container">
+      <div className="profile-picture-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img
-          src={talentDetails.profilePicture} // Ensure the URL is correct
+          src={talentDetails.profilePicture}
           alt="Profile"
-          className="profile-picture"
+          style={{
+            width: '150px',
+            height: '150px',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            marginBottom: '10px'
+          }}
         />
-        <p className="profile-name">{talentDetails.username}</p>
+        <p className="profile-name" style={{ textAlign: 'center' }}>{talentDetails.username}</p>
+        {role !== 'hr' && (
+          <label className="update-picture-label" style={{ textAlign: 'center' }}>
+            Update Picture
+            <input type="file" onChange={handlePictureChange} style={{ display: 'none' }} />
+          </label>
+        )}
       </div>
-      <label className="update-picture-label">
-        Update Picture
-        <input type="file" onChange={handlePictureChange} style={{ display: 'none' }} />
-      </label>
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
@@ -121,9 +136,9 @@ const TalentProfile = () => {
           },
         }}
       >
-        {preview && <img src={preview} alt="Preview" className="preview-image" />}
-        <button onClick={handlePictureUpload} className="upload-button">Upload Picture</button>
-        <button onClick={() => setModalIsOpen(false)} className="cancel-button">Cancel</button>
+        {preview && <img src={preview} alt="Preview" style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover' }} />}
+        <button onClick={handlePictureUpload}>Upload Picture</button>
+        <button onClick={() => setModalIsOpen(false)}>Cancel</button>
       </Modal>
       <div className="profile-details">
         <div className="profile-box">
@@ -167,9 +182,11 @@ const TalentProfile = () => {
           <p>{talentDetails.skills.join(', ')}</p>
         </div>
       </div>
-      <button type="button" className="btn btn-primary" onClick={() => setEditModalIsOpen(true)}>
-        Update Profile
-      </button>
+      {role !== 'hr' && (
+        <button type="button" className="btn btn-primary" onClick={() => setEditModalIsOpen(true)}>
+          Update Profile
+        </button>
+      )}
       <Modal
         isOpen={editModalIsOpen}
         onRequestClose={() => setEditModalIsOpen(false)}
@@ -313,7 +330,7 @@ const TalentProfile = () => {
             </div>
           </div>
           <div className="profile-box">
-          <div className="form-group">
+            <div className="form-group">
               <label className="bold-label">Skills: </label>
               <ReactTags
                 tags={talentDetails.skills.map((skill) => ({ id: skill, text: skill }))}

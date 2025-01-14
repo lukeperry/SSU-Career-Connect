@@ -18,6 +18,7 @@ import TalentProfile from './pages/TalentProfile'; // Import TalentProfile compo
 import TalentJobBoard from './pages/TalentJobBoard'; // Import TalentJobBoard component
 import TalentMessages from './pages/TalentMessages'; // Import TalentMessages component
 import TalentLayout from './components/TalentLayout'; // Import TalentLayout component
+import ApplicantsList from './components/ApplicantsList'; // Import ApplicantsList component
 import HRDashboard from './pages/HRDashboard';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 //
@@ -35,7 +36,9 @@ const App = () => {
         <Route path="/hr/posted-jobs" element={<ProtectedRoute><HRLayout><HRPostedJobs /></HRLayout></ProtectedRoute>} />
         <Route path="/hr/post-job" element={<ProtectedRoute><HRLayout><HRPostJob /></HRLayout></ProtectedRoute>} />
         <Route path="/hr/edit-job/:id" element={<ProtectedRoute><HRLayout><HREditJob /></HRLayout></ProtectedRoute>} />
-
+        <Route path="/hr/talent-profile/:id" element={<ProtectedRoute><HRLayout><TalentProfile /></HRLayout></ProtectedRoute>} />
+        <Route path="/hr/applicants/:jobId" element={<ProtectedRoute><HRLayout><ApplicantsList /></HRLayout></ProtectedRoute>} /> {/* New route for viewing applicants */}
+        
         <Route path="/talent" element={<TalentPage />} />
         <Route path="/talent/login" element={<TalentLogin />} /> {/* Talent Login */}
         <Route path="/talent/register" element={<TalentRegister />} /> {/* Talent Register */}

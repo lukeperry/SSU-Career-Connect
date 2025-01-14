@@ -1,75 +1,109 @@
 // routes/applicationRoute.js
 const express = require('express');
 const router = express.Router();
+const { verifyToken } = require('../../utils/authMiddleware');
 const Application = require('../models/application');
 const Job = require('../models/job');
-const { verifyToken } = require('../../utils/authMiddleware');
+const Talent = require('../models/talent');
+const { calculateMatchScore } = require('../../utils/matchAlgorithm'); // Import the calculateMatchScore function
+
+// Test connection
+router.get('/application', (req, res) => {
+  res.status(200).json({ message: 'Connected to application routes' });
+});
 
 // Apply to a job
 router.post('/job/:id/apply', verifyToken, async (req, res) => {
-    const { id } = req.params;
-    const talentId = req.user.id;  // Assuming the user is the talent
-  
-    try {
-      // Check if the job is open
-      const job = await Job.findById(id);
-      if (job.status !== 'open') {
-        return res.status(400).json({ message: 'This job is no longer open for applications.' });
-      }
-  
-      // Check if the user has already applied
-      const existingApplication = await Application.findOne({ jobId: id, talentId });
-      if (existingApplication) {
-        return res.status(400).json({ message: 'You have already applied to this job.' });
-      }
-  
-      // Create a new application
-      const application = new Application({
-        jobId: id,
-        talentId,
-        status: 'pending'
-      });
-      await application.save();
-  
-      res.status(200).json({ message: 'Application successful!', application });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Error applying for job', error: err });
-    }
-  });
+  const { id } = req.params;
+  const talentId = req.user.id;  // Assuming the user is the talent
 
-  // Get all applications for a job (admin or HR should be able to see this)
+  console.log(`Applying for job with ID: ${id} by talent with ID: ${talentId}`);
+
+  try {
+    // Check if the job is open
+    const job = await Job.findById(id);
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    console.log(`Job status: ${job.status}`); // Log the job status
+
+    if (job.status !== 'open') {
+      return res.status(400).json({ message: 'This job is no longer open for applications.' });
+    }
+
+    // Check if the user has already applied
+    const existingApplication = await Application.findOne({ jobId: id, talentId });
+    console.log(`Existing application: ${existingApplication}`); // Log the existing application
+    if (existingApplication) {
+      return res.status(400).json({ message: 'You have already applied to this job.' });
+    }
+
+    // Calculate match score
+    const talent = await Talent.findById(talentId); // Fetch the talent details
+    const matchScore = await calculateMatchScore(job, talent);
+  
+    // Create a new application
+    const application = new Application({
+      jobId: id,
+      talentId,
+      matchScore,
+      status: 'pending'
+    });
+    await application.save();
+
+    // Update the job document to include the talent's ID in the applicants array
+    job.applicants.push(talentId);
+    await job.save();
+
+    res.status(200).json({ message: 'Application successful!', application });
+  } catch (err) {
+    console.error('Error applying for job:', err);
+    res.status(500).json({ message: 'Error applying for job', error: err });
+  }
+});
+
+// Get all applications for a job (admin or HR should be able to see this)
 router.get('/job/:id/applications', verifyToken, async (req, res) => {
-    const { id } = req.params;
-    try {
-      const applications = await Application.find({ jobId: id });
-      res.status(200).json({ applications });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Error fetching applications', error: err });
+  const { id } = req.params;
+  try {
+    const applications = await Application.find({ jobId: id }).populate('talentId', 'firstName lastName profilePicture email'); // Populate talent details
+    res.status(200).json({ applications });
+  } catch (err) {
+    console.error('Error fetching applications:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update application status
+router.put('/:id/status', verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    const application = await Application.findByIdAndUpdate(id, { status }, { new: true });
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
     }
-  });
-  
-  // Update application status (HR/Admin)
-router.put('/application/:id/status', verifyToken, async (req, res) => {
-    const { status } = req.body;  // New status, e.g., 'accepted' or 'rejected'
-  
-    if (!['accepted', 'rejected'].includes(status)) {
-      return res.status(400).json({ message: 'Invalid status' });
+    res.json(application);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get a specific application by ID
+router.get('/:id', verifyToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const application = await Application.findById(id).populate('talentId', 'firstName lastName profilePicture email');
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
     }
-  
-    try {
-      const application = await Application.findByIdAndUpdate(
-        req.params.id,
-        { status },
-        { new: true }
-      );
-  
-      res.status(200).json({ message: 'Application status updated', application });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Error updating application status', error: err });
-    }
-  });
-  
-  module.exports = router;
+    res.json(application);
+  } catch (error) {
+    console.error('Error fetching application:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+module.exports = router;

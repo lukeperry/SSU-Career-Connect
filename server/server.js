@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const connectDB = require('./config/db'); 
-const PORT = process.env.PORT || 5000;
 const path = require('path');
+const PORT = process.env.PORT || 5000;
 
 // Connect to the database
 connectDB();

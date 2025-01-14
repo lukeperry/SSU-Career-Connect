@@ -34,6 +34,30 @@ const TalentJobBoard = () => {
     fetchJobs();
   }, []);
 
+  const handleApply = async (jobId) => {
+    const confirmApply = window.confirm('Are you sure you want to apply for this job?');
+    if (!confirmApply) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${process.env.REACT_APP_API_ADDRESS}/api/application/job/${jobId}/apply`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      alert('Application successful!');
+    } catch (err) {
+      console.error('Error applying for job:', err);
+      if (err.response && err.response.data && err.response.data.message === 'You have already applied to this job.') {
+        alert('You have already applied to this job.');
+      } else {
+        alert('Failed to apply for job.');
+      }
+    }
+  };
+
   const handleMatchJobs = async () => {
     setIsCalculating(true);
     setIsModalOpen(true);
@@ -86,6 +110,7 @@ const TalentJobBoard = () => {
               key={job._id}
               job={job}
               onClick={() => console.log(`Job clicked: ${job.title}`)} // Handle job click
+              onApply={handleApply} // Handle job application
             />
           ))
         )}
@@ -128,6 +153,7 @@ const TalentJobBoard = () => {
                   job={job}
                   score={score} // Pass the score to the JobCard component
                   onClick={() => console.log(`Recommended Job clicked: ${job.title}`)} // Handle job click
+                  onApply={handleApply} // Handle job application
                 />
               ))
             )}

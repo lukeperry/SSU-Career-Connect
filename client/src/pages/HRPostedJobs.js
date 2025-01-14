@@ -36,10 +36,6 @@ const HRPostedJobs = () => {
     setSelectedJob(job);
   };
 
-  const closeModal = () => {
-    setSelectedJob(null);
-  };
-
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -50,23 +46,26 @@ const HRPostedJobs = () => {
 
   return (
     <div className="job-list-container">
-      <h1>Posted Jobs under {localStorage.getItem('companyName')}</h1>
+      <h1>Posted Jobs</h1>
       <div className="job-list">
         {jobs.length === 0 ? (
-          <p>No posted jobs available.</p>
+          <p>No jobs available.</p>
         ) : (
           jobs.map((job) => (
             <JobCard
               key={job._id}
               job={job}
-              onClick={() => openModal(job)}
-              tabIndex="0" // Make the div focusable
+              onClick={() => openModal(job)} // Handle job click
+              // Do not pass onApply prop to avoid displaying the Apply button
             />
           ))
         )}
       </div>
       {selectedJob && (
-        <JobModal job={selectedJob} onClose={closeModal} />
+        <JobModal
+          job={selectedJob}
+          onClose={() => setSelectedJob(null)}
+        />
       )}
     </div>
   );

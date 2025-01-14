@@ -13,20 +13,13 @@ const HRPostJob = () => {
     requiredSkills: [], // Will be used for ReactTags
     salary: '',
     location: '',
-    companyName: '', // this will be set to the HR's company
+    companyName: localStorage.getItem('companyName') || '', // Set company name from local storage
+    status: 'open', // Default status
   });
-
-  // Assume HR's companyName comes from the token or user context
-  useEffect(() => {
-    const companyName = localStorage.getItem('companyName'); // Fetch HR's company from localStorage or state
-    setFormData(prevState => ({
-      ...prevState,
-      companyName: companyName,
-    }));
-  }, []);
 
   const [isSubmitting, setIsSubmitting] = useState(false); // For disabling the button
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate(); // Use useNavigate instead of useHistory
 
   // Handle form changes for general input fields
@@ -151,6 +144,15 @@ const HRPostJob = () => {
             inputFieldPosition="bottom" // Position of the input field
             autocomplete // Enable autocomplete for the input
           />
+        </div>
+
+        {/* Status Field */}
+        <div className="form-group">
+          <label htmlFor="status">Status</label>
+          <select name="status" value={formData.status} onChange={handleChange} required>
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
+          </select>
         </div>
 
         <button 

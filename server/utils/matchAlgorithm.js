@@ -1,7 +1,10 @@
+//working
+
 const tf = require('@tensorflow/tfjs-node');
 const use = require('@tensorflow-models/universal-sentence-encoder');
 const natural = require('natural');
 const wordnet = new natural.WordNet();
+const stemmer = natural.PorterStemmer;
 
 let model;
 
@@ -48,6 +51,18 @@ async function lemmatizeText(text) {
   return lemmatizedWords.join(' ');
 }
 
+function stemText(text) {
+  return text.split(' ').map(word => stemmer.stem(word)).join(' ');
+}
+
+async function preprocessText(text) {
+  let normalizedText = normalizeText(text);
+  normalizedText = removeStopwords(normalizedText);
+  normalizedText = await lemmatizeText(normalizedText);
+  normalizedText = stemText(normalizedText);
+  return normalizedText;
+}
+
 async function calculateMatchScore(job, candidate) {
   try {
     // Log the entire candidate object
@@ -60,9 +75,9 @@ async function calculateMatchScore(job, candidate) {
     console.log('Raw Candidate Experience:', candidateExperience);
     console.log('Raw Candidate Skills:', candidateSkillsArray);
 
-    // Normalize, remove stopwords, and lemmatize experience and skills
-    const processedCandidateExperience = await lemmatizeText(removeStopwords(normalizeText(candidateExperience)));
-    const processedCandidateSkills = await lemmatizeText(removeStopwords(normalizeText(candidateSkillsArray.join(' '))));
+    // Preprocess experience and skills
+    const processedCandidateExperience = await preprocessText(candidateExperience);
+    const processedCandidateSkills = await preprocessText(candidateSkillsArray.join(' '));
 
     // Log intermediate results for debugging
     console.log('Processed Candidate Experience:', processedCandidateExperience);
@@ -72,8 +87,8 @@ async function calculateMatchScore(job, candidate) {
     const jobDescription = job.description || '';
     const jobSkills = job.requiredSkills || [];
 
-    const processedJobDescription = await lemmatizeText(removeStopwords(normalizeText(jobDescription)));
-    const processedJobSkills = await lemmatizeText(removeStopwords(normalizeText(jobSkills.join(' '))));
+    const processedJobDescription = await preprocessText(jobDescription);
+    const processedJobSkills = await preprocessText(jobSkills.join(' '));
 
     console.log('Processed Job Description:', processedJobDescription);
     console.log('Processed Job Skills:', processedJobSkills);
@@ -90,21 +105,29 @@ async function calculateMatchScore(job, candidate) {
 
     const [candidateEmbedding, jobEmbedding] = embeddings;
 
-    // Calculate cosine similarity
-    const matchScore = cosineSimilarity(candidateEmbedding, jobEmbedding);
+    // Log the shapes of the embeddings
+    console.log('Candidate Embedding Shape:', candidateEmbedding.length);
+    console.log('Job Embedding Shape:', jobEmbedding.length);
 
-    // Apply a minimum score threshold
-    const MIN_SCORE_THRESHOLD = 0.3;
-    if (matchScore < MIN_SCORE_THRESHOLD) {
-      return 0; // Discard jobs with a score below the threshold
+    // Ensure the embeddings have the expected shape
+    if (candidateEmbedding.length !== jobEmbedding.length) {
+      throw new Error('Embedding shapes do not match');
     }
 
-    // Apply weighting factors (example: 70% skills, 30% experience)
-    const skillsWeight = 0.7;
-    const experienceWeight = 0.3;
-    const weightedScore = (matchScore * skillsWeight) + (matchScore * experienceWeight);
+    // Convert embeddings to tensors
+    const candidateTensor = tf.tensor(candidateEmbedding);
+    const jobTensor = tf.tensor(jobEmbedding);
 
-    return weightedScore;
+    // Calculate weighted cosine similarity
+    const experienceWeight = 0.6;
+    const skillsWeight = 0.4;
+    const experienceSimilarity = cosineSimilarity(candidateTensor.slice([0], [candidateTensor.shape[0] / 2]), jobTensor.slice([0], [jobTensor.shape[0] / 2]));
+    const skillsSimilarity = cosineSimilarity(candidateTensor.slice([candidateTensor.shape[0] / 2]), jobTensor.slice([jobTensor.shape[0] / 2]));
+    const matchScore = (experienceWeight * experienceSimilarity) + (skillsWeight * skillsSimilarity);
+
+    console.log('Match Score:', matchScore);
+
+    return matchScore;
   } catch (error) {
     console.error('Error in calculateMatchScore:', error);
     throw error;

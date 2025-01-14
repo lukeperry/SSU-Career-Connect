@@ -1,0 +1,37 @@
+.applicants-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.applicant-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 250px;
+}
+
+.profile-picture {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.applicant-details {
+  padding: 16px;
+}
+
+.applicant-details p {
+  margin: 8px 0;
+}
+
+.applicant-details a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.applicant-details a:hover {
+  text-decoration: underline;
+}

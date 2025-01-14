@@ -28,6 +28,7 @@ const TalentLogin = () => {
       setMessage(response.data.message || "Login successful!");
       // Save the token or user data to localStorage or context if needed
       localStorage.setItem("token", token);
+      localStorage.setItem("role", "talent"); // Save the role to localStorage
       
       // Redirect to Talent dashboard after successful login
       navigate("/talent/dashboard");

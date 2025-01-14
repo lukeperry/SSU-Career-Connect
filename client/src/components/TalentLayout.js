@@ -11,7 +11,7 @@ const TalentLayout = ({ children }) => {
           <li><Link to="/talent/profile">Profile</Link></li>
           <li><Link to="/talent/job-board">Job Board</Link></li>
           <li><Link to="/talent/messages">Messages</Link></li>
-          <li><Link to="/" onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('userRole'); }}>Logout</Link></li>
+          <li><Link to="/" onClick={() => { localStorage.clear() }}>Logout</Link></li>
         </ul>
       </nav>
 

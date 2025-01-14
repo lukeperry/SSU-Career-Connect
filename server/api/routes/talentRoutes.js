@@ -26,10 +26,11 @@ const generateSASToken = (blobName) => {
   return generateBlobSASQueryParameters(sasOptions, blobServiceClient.credential).toString();
 };
 
-// Get talent profile
-router.get('/profile', verifyToken, async (req, res) => {
+// Get talent profile by ID or current user
+router.get('/profile/:id?', verifyToken, async (req, res) => {
   try {
-    const talent = await Talent.findById(req.user.id).select('username firstName lastName birthday gender email phoneNumber location experience skills profilePicture');
+    const talentId = req.params.id || req.user.id;
+    const talent = await Talent.findById(talentId).select('username firstName lastName birthday gender email phoneNumber location experience skills profilePicture');
     if (!talent) {
       return res.status(404).json({ message: 'Talent not found' });
     }

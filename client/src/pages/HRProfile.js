@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Modal from 'react-modal';
-import '../css/Profile.css'; // Import the CSS file for styling
 
 const HRProfile = () => {
-  const [hrDetails, setHrDetails] = useState(null);
+  const [hrDetails, setHrDetails] = useState({});
   const [profilePicture, setProfilePicture] = useState(null);
   const [preview, setPreview] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -42,35 +43,41 @@ const HRProfile = () => {
       const response = await axios.post(`${process.env.REACT_APP_API_ADDRESS}/api/hr/upload-profile-picture`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data"
-        }
+          "Content-Type": "multipart/form-data",
+        },
       });
-      // Update the profile picture URL in the frontend state
+      setMessage("Profile picture updated successfully!");
       setHrDetails({ ...hrDetails, profilePicture: response.data.profilePicture });
       setModalIsOpen(false);
-      setPreview(null);
     } catch (error) {
-      console.error("Error uploading profile picture:", error);
+      console.error("Error uploading picture:", error);
+      setMessage("Failed to upload profile picture.");
     }
   };
 
-  if (!hrDetails) return <div>Loading...</div>;
-
   return (
     <div className="profile-container">
-      <h2 className="profile-title">HR Profile</h2>
-      <div className="profile-picture-container">
+      <h1 className="profile-title">HR Profile</h1>
+      {message && <div className="success-message">{message}</div>}
+      {error && <p className="error">{error}</p>}
+      <div className="profile-picture-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img
-          src={hrDetails.profilePicture} // Ensure the URL is correct
+          src={hrDetails.profilePicture}
           alt="Profile"
-          className="profile-picture"
+          style={{
+            width: '150px',
+            height: '150px',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            marginBottom: '10px'
+          }}
         />
-        <p className="profile-name">{hrDetails.username}</p>
+        <p className="profile-name" style={{ textAlign: 'center' }}>{hrDetails.username}</p>
+        <label className="update-picture-label" style={{ textAlign: 'center' }}>
+          Update Picture
+          <input type="file" onChange={handlePictureChange} style={{ display: 'none' }} />
+        </label>
       </div>
-      <label className="update-picture-label">
-        Update Picture
-        <input type="file" onChange={handlePictureChange} style={{ display: 'none' }} />
-      </label>
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
@@ -89,7 +96,7 @@ const HRProfile = () => {
           },
         }}
       >
-        {preview && <img src={preview} alt="Preview" className="preview-image" />}
+        {preview && <img src={preview} alt="Preview" style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover' }} />}
         <button onClick={handlePictureUpload}>Upload Picture</button>
         <button onClick={() => setModalIsOpen(false)}>Cancel</button>
       </Modal>

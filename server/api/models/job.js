@@ -1,4 +1,3 @@
-// api/models/job.js
 const mongoose = require('mongoose');
 
 const jobSchema = new mongoose.Schema({
@@ -17,11 +16,10 @@ const jobSchema = new mongoose.Schema({
   requiredSkills: { 
     type: [String], 
     required: true,
-    validate: [array => array.length > 0, 'At least one skill is required.']
   }, // Skills required for the job
   salary: {
     type: String, // Can use String for range or number for exact value
-    required: false,
+    required: true,
   },
   location: {
     type: String,
@@ -31,6 +29,11 @@ const jobSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
+  status: { 
+    type: String, 
+    enum: ['open', 'closed'], 
+    default: 'open' ,
+  },  // Status of the job
   postedBy: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'HRPartner' 
@@ -43,7 +46,7 @@ const jobSchema = new mongoose.Schema({
     type: Date, 
     default: Date.now 
   },
+
 });
 
 module.exports = mongoose.model('Job', jobSchema);
-
