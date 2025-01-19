@@ -11,10 +11,10 @@ const talentSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   phoneNumber: { type: String, required: true },
   password: { type: String, required: true },
-  location: { type: String, required: true },
-  experience: { type: String, required: true },
-  profilePicture: { type: String, required: true },
-  skills: { type: [String], required: true },
+  location: { type: String },
+  experience: { type: String },
+  profilePicture: { type: String },
+  skills: { type: [String]},
   createdAt: { type: Date, default: Date.now },
 });
 // Method to compare password

@@ -1,23 +1,39 @@
-//working
-
-const tf = require('@tensorflow/tfjs-node');
+const tf = require('@tensorflow/tfjs-node'); // Ensure this is the CPU version
 const use = require('@tensorflow-models/universal-sentence-encoder');
-const natural = require('natural');
-const wordnet = new natural.WordNet();
-const stemmer = natural.PorterStemmer;
 
-let model;
+let cachedModel = null;
 
 async function loadModel() {
-  if (!model) {
-    model = await use.load();
+  if (cachedModel) {
+    return cachedModel;
+  }
+
+  // Set the backend to CPU
+  await tf.setBackend('cpu');
+  await tf.ready();
+
+  const modelUrl = 'https://tfhub.dev/tensorflow/tfjs-model/universal-sentence-encoder-lite/1/default/1/model.json?tfjs-format=file';
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      cachedModel = await use.load({ modelUrl });
+      return cachedModel;
+    } catch (error) {
+      console.error(`Error loading model on attempt ${attempt + 1}:`, error);
+      if (attempt === 2) {
+        throw error;
+      }
+    }
   }
 }
 
-async function computeEmbeddings(documents) {
-  await loadModel();
-  const embeddings = await model.embed(documents);
-  return embeddings.arraySync(); // Ensure embeddings are returned as an array
+async function computeEmbeddings(model, documents) {
+  try {
+    const embeddings = await model.embed(documents);
+    return embeddings.arraySync(); // Ensure embeddings are returned as an array
+  } catch (error) {
+    console.error('Error computing embeddings:', error);
+    throw error;
+  }
 }
 
 function cosineSimilarity(a, b) {
@@ -27,104 +43,50 @@ function cosineSimilarity(a, b) {
   return dotProduct.div(normA.mul(normB)).dataSync()[0];
 }
 
-function normalizeText(text) {
-  return text.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+function validateEmbeddings(embeddings) {
+  return embeddings.every(embedding => embedding.length === 512);
 }
 
-function removeStopwords(text) {
-  const stopwords = new Set(['a', 'an', 'the', 'and', 'or', 'but', 'if', 'then', 'else', 'when', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now']);
-  return text.split(' ').filter(word => !stopwords.has(word)).join(' ');
-}
-
-async function lemmatizeText(text) {
-  const tokenizer = new natural.WordTokenizer();
-  const words = tokenizer.tokenize(text);
-  const lemmatizedWords = await Promise.all(words.map(word => new Promise((resolve, reject) => {
-    wordnet.lookup(word, (results) => {
-      if (results && results.length > 0) {
-        resolve(results[0].lemma);
-      } else {
-        resolve(word);
-      }
-    });
-  })));
-  return lemmatizedWords.join(' ');
-}
-
-function stemText(text) {
-  return text.split(' ').map(word => stemmer.stem(word)).join(' ');
-}
-
-async function preprocessText(text) {
-  let normalizedText = normalizeText(text);
-  normalizedText = removeStopwords(normalizedText);
-  normalizedText = await lemmatizeText(normalizedText);
-  normalizedText = stemText(normalizedText);
-  return normalizedText;
-}
-
-async function calculateMatchScore(job, candidate) {
+async function calculateMatchScore(job, talent) {
   try {
-    // Log the entire candidate object
-    console.log('Candidate Object:', candidate);
+    console.log('Job Object:', job);
+    console.log('Talent Object:', talent);
 
-    // Ensure candidate object has the expected structure
-    const candidateExperience = candidate.experience || '';  // Fallback to empty string if undefined
-    const candidateSkillsArray = candidate.skills || [];  // Fallback to empty array if undefined
+    const jobSkills = Array.isArray(job.requiredSkills) ? job.requiredSkills.join(' ') : '';
+    const talentSkills = Array.isArray(talent.skills) ? talent.skills.join(' ') : '';
 
-    console.log('Raw Candidate Experience:', candidateExperience);
-    console.log('Raw Candidate Skills:', candidateSkillsArray);
-
-    // Preprocess experience and skills
-    const processedCandidateExperience = await preprocessText(candidateExperience);
-    const processedCandidateSkills = await preprocessText(candidateSkillsArray.join(' '));
-
-    // Log intermediate results for debugging
-    console.log('Processed Candidate Experience:', processedCandidateExperience);
-    console.log('Processed Candidate Skills:', processedCandidateSkills);
-
-    // Example match score calculation (this can be replaced with a more complex algorithm)
-    const jobDescription = job.description || '';
-    const jobSkills = job.requiredSkills || [];
-
-    const processedJobDescription = await preprocessText(jobDescription);
-    const processedJobSkills = await preprocessText(jobSkills.join(' '));
-
-    console.log('Processed Job Description:', processedJobDescription);
-    console.log('Processed Job Skills:', processedJobSkills);
-
-    // Compute embeddings
-    const candidateText = `${processedCandidateExperience} ${processedCandidateSkills}`;
-    const jobText = `${processedJobDescription} ${processedJobSkills}`;
-    const embeddings = await computeEmbeddings([candidateText, jobText]);
-
-    // Ensure embeddings are returned as an array
-    if (!Array.isArray(embeddings) || embeddings.length !== 2) {
-      throw new Error('Embeddings computation failed');
+    if (!jobSkills || !talentSkills) {
+      console.log('Job or Talent skills are empty.');
+      console.log('Job Skills:', jobSkills);
+      console.log('Talent Skills:', talentSkills);
+      return 0;
     }
 
-    const [candidateEmbedding, jobEmbedding] = embeddings;
+    console.log('Job Skills:', jobSkills);
+    console.log('Talent Skills:', talentSkills);
 
-    // Log the shapes of the embeddings
-    console.log('Candidate Embedding Shape:', candidateEmbedding.length);
-    console.log('Job Embedding Shape:', jobEmbedding.length);
-
-    // Ensure the embeddings have the expected shape
-    if (candidateEmbedding.length !== jobEmbedding.length) {
-      throw new Error('Embedding shapes do not match');
+    let jobEmbedding, talentEmbedding;
+    const model = await loadModel();
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        [jobEmbedding, talentEmbedding] = await computeEmbeddings(model, [jobSkills, talentSkills]);
+        if (validateEmbeddings([jobEmbedding, talentEmbedding])) {
+          break;
+        }
+      } catch (embeddingError) {
+        console.warn(`Error computing embeddings on attempt ${attempt + 1}:`, embeddingError);
+      }
+      console.warn(`Invalid embeddings on attempt ${attempt + 1}, retrying...`);
     }
 
-    // Convert embeddings to tensors
-    const candidateTensor = tf.tensor(candidateEmbedding);
-    const jobTensor = tf.tensor(jobEmbedding);
+    if (!validateEmbeddings([jobEmbedding, talentEmbedding])) {
+      throw new Error('Failed to compute valid embeddings after 3 attempts');
+    }
 
-    // Calculate weighted cosine similarity
-    const experienceWeight = 0.6;
-    const skillsWeight = 0.4;
-    const experienceSimilarity = cosineSimilarity(candidateTensor.slice([0], [candidateTensor.shape[0] / 2]), jobTensor.slice([0], [jobTensor.shape[0] / 2]));
-    const skillsSimilarity = cosineSimilarity(candidateTensor.slice([candidateTensor.shape[0] / 2]), jobTensor.slice([jobTensor.shape[0] / 2]));
-    const matchScore = (experienceWeight * experienceSimilarity) + (skillsWeight * skillsSimilarity);
+    console.log('Job Embedding:', jobEmbedding);
+    // console.log('Talent Embedding:', talentEmbedding); // Hide talent embedding
 
+    const matchScore = cosineSimilarity(jobEmbedding, talentEmbedding);
     console.log('Match Score:', matchScore);
 
     return matchScore;

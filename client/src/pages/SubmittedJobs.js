@@ -1,7 +1,6 @@
 // client/src/pages/SubmittedJobs.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import Modal from 'react-modal';
 import '../css/SubmittedJobs.css'; // Import the CSS file for styling
 

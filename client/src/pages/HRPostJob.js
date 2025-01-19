@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react'; // Removed useEffect
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import '../css/HRPostJob.css'; // Link to the CSS file for styling
@@ -19,7 +19,6 @@ const HRPostJob = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false); // For disabling the button
   const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate(); // Use useNavigate instead of useHistory
 
   // Handle form changes for general input fields
