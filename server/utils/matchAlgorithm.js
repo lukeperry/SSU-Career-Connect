@@ -1,4 +1,4 @@
-const tf = require('@tensorflow/tfjs-node'); // Ensure this is the CPU version
+const tf = require('@tensorflow/tfjs'); // Use the pure JavaScript version
 const use = require('@tensorflow-models/universal-sentence-encoder');
 
 let cachedModel = null;
@@ -44,7 +44,7 @@ function cosineSimilarity(a, b) {
 }
 
 function validateEmbeddings(embeddings) {
-  return embeddings.every(embedding => embedding.length === 512);
+  return embeddings.every(embedding => embedding.length > 0);
 }
 
 async function calculateMatchScore(job, talent) {
@@ -66,10 +66,9 @@ async function calculateMatchScore(job, talent) {
     console.log('Talent Skills:', talentSkills);
 
     let jobEmbedding, talentEmbedding;
-    const model = await loadModel();
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        [jobEmbedding, talentEmbedding] = await computeEmbeddings(model, [jobSkills, talentSkills]);
+        [jobEmbedding, talentEmbedding] = await computeEmbeddings(await loadModel(), [jobSkills, talentSkills]);
         if (validateEmbeddings([jobEmbedding, talentEmbedding])) {
           break;
         }

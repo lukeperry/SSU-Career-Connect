@@ -8,7 +8,6 @@ const HRProfile = () => {
   const [preview, setPreview] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -59,7 +58,6 @@ const HRProfile = () => {
     <div className="profile-container">
       <h1 className="profile-title">HR Profile</h1>
       {message && <div className="success-message">{message}</div>}
-      {error && <p className="error">{error}</p>}
       <div className="profile-picture-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img
           src={hrDetails.profilePicture}
