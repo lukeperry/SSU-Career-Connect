@@ -22,6 +22,9 @@ app.use(express.json());
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../client/build')));
+
 // Import routes
 const authRoutes = require('./api/routes/authRoutes');
 const jobRoutes = require('./api/routes/jobRoutes');
@@ -41,6 +44,11 @@ app.use('/api/dashboard', dashboardRoutes); // Dashboard routes for talents and 
 app.use('/api/hr', hrRoutes); // Use HR routes
 app.use('/api/talent', talentRoutes); // Use Talent routes
 app.use('/api/match', matchRoutes); // Use Match routes
+
+// The "catchall" handler: for any request that doesn't match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })

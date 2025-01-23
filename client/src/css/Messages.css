@@ -20,9 +20,18 @@ body, html {
   overflow-y: auto;
   border-radius: 10px; /* Add rounded corners */
   margin-right: 20px; /* Add space between the sidebar and conversation */
+  position: relative; /* Relative position for desktop */
+  top: 0; /* Align to the top */
+  left: 0; /* Align to the left */
+  height: 100%; /* Full height */
+  z-index: 1000; /* Ensure it appears above other elements */
+  transform: none; /* No transform for desktop */
+  transition: none; /* No transition for desktop */
 }
 
 .sidebar h2 {
+  text-align: center; /* Center the text */
+  font-weight: bold; /* Make the text bold */
   margin-bottom: 20px;
 }
 
@@ -56,30 +65,30 @@ body, html {
 }
 
 .profile-picture-container {
-    width: 50px; /* Set a fixed width for the container */
-    height: 50px; /* Set a fixed height for the container */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10px; /* Add space between the picture and user info */
-    padding: 0; /* Remove padding to avoid oblong shape */
-  }
+  width: 50px; /* Set a fixed width for the container */
+  height: 50px; /* Set a fixed height for the container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px; /* Add space between the picture and user info */
+  padding: 0; /* Remove padding to avoid oblong shape */
+}
 
 .profile-picture-container-2 {
-    width: 50px; /* Set a fixed width for the container */
-    height: 50px; /* Set a fixed height for the container */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10px; /* Add space between the picture and user info */
+  width: 50px; /* Set a fixed width for the container */
+  height: 50px; /* Set a fixed height for the container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px; /* Add space between the picture and user info */
 }
 
 .profile-picture-messages {
-    width: 50px; /* Force the profile picture to be 50x50 */
-    height: 50px; /* Force the profile picture to be 50x50 */
-    border-radius: 50%; /* Make the profile picture a circle */
-    object-fit: cover; /* Ensure the image covers the area without distortion */
-  }
+  width: 50px; /* Force the profile picture to be 50x50 */
+  height: 50px; /* Force the profile picture to be 50x50 */
+  border-radius: 50%; /* Make the profile picture a circle */
+  object-fit: cover; /* Ensure the image covers the area without distortion */
+}
 
 .user-info {
   width: calc(100% - 60px); /* Adjust width to fit next to the profile picture */
@@ -112,14 +121,15 @@ body, html {
 }
 
 .conversation {
-  width: 50%; /* Set the width of the conversation container */
-  max-width: 800px; /* Set a maximum width */
+  width: 75%; /* Set the width of the conversation container */
+  max-width: none; /* No maximum width */
   padding: 20px;
   background-color: #fff;
   border-radius: 10px; /* Add rounded corners */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column; /* Ensure the send-message is at the bottom */
+  margin-left: auto; /* Align to the right */
 }
 
 .conversation-header {
@@ -254,4 +264,70 @@ body, html {
 .no-conversation p {
   color: grey;
   font-weight: bold;
+}
+
+/* Media Queries for Mobile */
+@media (max-width: 768px) {
+  .messages-container {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .sidebar {
+    display: none;
+    width: 100%;
+    margin-right: 0;
+    border-right: none;
+    border-radius: 0;
+    position: absolute; /* Absolute position for mobile */
+    top: 60px; /* Adjust top position to account for menu bar */
+    left: 0;
+    height: calc(100% - 60px); /* Adjust height to not overlap with menu bar */
+    transform: translateX(-100%); /* Initially hide the sidebar */
+    transition: transform 0.3s ease-in-out; /* Smooth transition */
+  }
+
+  .sidebar.active {
+    display: block;
+    transform: translateX(0); /* Show the sidebar when active */
+    animation: slideInRight 0.3s forwards; /* Add slide-in animation */
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .conversation {
+    width: 100%;
+    max-width: none;
+    padding: 10px;
+    border-radius: 0;
+    box-shadow: none;
+    flex: 1; /* Take up remaining space */
+    max-height: calc(100% - 60px); /* Ensure the conversation area does not exceed available space */
+    display: flex;
+    flex-direction: column; /* Ensure the send-message is at the bottom */
+  }
+
+  .hamburger {
+    display: block;
+    position: absolute;
+    top: 70px; /* Adjust top position to be below the navigation menu */
+    left: 10px;
+    z-index: 1001;
+    cursor: pointer;
+  }
+
+  .hamburger .bar {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    background-color: #333;
+  }
 }

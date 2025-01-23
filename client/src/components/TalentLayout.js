@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const TalentLayout = ({ children }) => {
-
   return (
     <div>
       <nav className="bg-gray-800 p-4 text-white">
@@ -15,8 +14,6 @@ const TalentLayout = ({ children }) => {
           <li><Link to="/" onClick={() => { localStorage.clear() }}>Logout</Link></li>
         </ul>
       </nav>
-
-      {/* This is where the page content will change */}
       <div className="container mx-auto mt-5">{children}</div>
     </div>
   );

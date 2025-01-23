@@ -11,6 +11,7 @@ const Messages = () => {
   const [selectedUser, setSelectedUser] = useState(null); // State to store the selected user for conversation
   const [conversations, setConversations] = useState([]); // State to store users with conversations
   const [searchEmail, setSearchEmail] = useState(""); // State to store the search input
+  const [sidebarActive, setSidebarActive] = useState(false); // State to control sidebar visibility on mobile
 
   const userId = localStorage.getItem("userId");
   const role = localStorage.getItem("role");
@@ -131,9 +132,18 @@ const Messages = () => {
     ? users.filter(user => conversations.includes(user._id))
     : users.filter(user => user.email === searchEmail);
 
+  const toggleSidebar = () => {
+    setSidebarActive(!sidebarActive);
+  };
+
   return (
     <div className="messages-container animated-gradient">
-      <div className="sidebar">
+      <div className="hamburger" onClick={toggleSidebar}>
+        <div className="bar"></div>
+        <div className="bar"></div>
+        <div className="bar"></div>
+      </div>
+      <div className={`sidebar ${sidebarActive ? 'active' : ''}`}>
         <h2>Conversations</h2>
         <input 
           type="text" 
@@ -144,7 +154,7 @@ const Messages = () => {
         />
         <ul>
           {filteredUsers.map((user) => (
-            <li key={user._id} onClick={() => setSelectedUser(user)} className={selectedUser && selectedUser._id === user._id ? "selected" : ""}>
+            <li key={user._id} onClick={() => { setSelectedUser(user); setSidebarActive(false); }} className={selectedUser && selectedUser._id === user._id ? "selected" : ""}>
               <div className="profile-picture-container">
                 <img src={user.profilePicture} alt={`${user.firstName} ${user.lastName}`} className="profile-picture-messages" />
               </div>
