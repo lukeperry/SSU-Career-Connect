@@ -56,14 +56,14 @@ body, html {
 }
 
 .profile-picture-container {
-  width: 50px; /* Set a fixed width for the container */
-  height: 50px; /* Set a fixed height for the container */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px; /* Add space between the picture and user info */
-  padding-top: 25px; /* Add padding to the top to center the picture */
-}
+    width: 50px; /* Set a fixed width for the container */
+    height: 50px; /* Set a fixed height for the container */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px; /* Add space between the picture and user info */
+    padding: 0; /* Remove padding to avoid oblong shape */
+  }
 
 .profile-picture-container-2 {
     width: 50px; /* Set a fixed width for the container */
@@ -74,12 +74,12 @@ body, html {
     margin-right: 10px; /* Add space between the picture and user info */
 }
 
-.profile-picture {
-  width: 100%; /* Ensure the profile picture fits within the container */
-  height: 100%; /* Ensure the profile picture fits within the container */
-  border-radius: 50%; /* Make the profile picture a circle */
-  object-fit: cover; /* Ensure the image covers the area without distortion */
-}
+.profile-picture-messages {
+    width: 50px; /* Force the profile picture to be 50x50 */
+    height: 50px; /* Force the profile picture to be 50x50 */
+    border-radius: 50%; /* Make the profile picture a circle */
+    object-fit: cover; /* Ensure the image covers the area without distortion */
+  }
 
 .user-info {
   width: calc(100% - 60px); /* Adjust width to fit next to the profile picture */

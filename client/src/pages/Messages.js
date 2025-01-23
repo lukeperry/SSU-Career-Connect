@@ -127,10 +127,9 @@ const Messages = () => {
     }
   };
 
-  const filteredUsers = users.filter(user => 
-    conversations.includes(user._id) && 
-    (searchEmail === "" || user.email === searchEmail)
-  );
+  const filteredUsers = searchEmail === "" 
+    ? users.filter(user => conversations.includes(user._id))
+    : users.filter(user => user.email === searchEmail);
 
   return (
     <div className="messages-container animated-gradient">
@@ -147,7 +146,7 @@ const Messages = () => {
           {filteredUsers.map((user) => (
             <li key={user._id} onClick={() => setSelectedUser(user)} className={selectedUser && selectedUser._id === user._id ? "selected" : ""}>
               <div className="profile-picture-container">
-                <img src={user.profilePicture} alt={`${user.firstName} ${user.lastName}`} className="profile-picture" />
+                <img src={user.profilePicture} alt={`${user.firstName} ${user.lastName}`} className="profile-picture-messages" />
               </div>
               <div className="user-info">
                 <span className="full-name">{`${user.firstName} ${user.lastName}`}</span>
