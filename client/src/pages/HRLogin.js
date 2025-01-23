@@ -22,13 +22,14 @@ const HRLogin = () => {
     e.preventDefault();
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_ADDRESS}/api/auth/login/hr`, formData);
-      const { token, companyName } = response.data;
+      const { token, companyName, id } = response.data;
       console.log(response.data); // Log the server's response or process it
       setMessage(response.data.message || "Login successful!");
       
       // Save the token or user data to localStorage or context if needed
       localStorage.setItem("token", token);
       localStorage.setItem("companyName", companyName);
+      localStorage.setItem("userId", id);
       localStorage.setItem("role", "hr");
       
       // Redirect to HR dashboard after successful login

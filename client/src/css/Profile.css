@@ -1,4 +1,11 @@
 /* Profile.css */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: auto; /* Allow scrolling */
+}
+
 .profile-container {
   max-width: 600px;
   margin: 20px auto; /* Center the container */
@@ -7,11 +14,15 @@
   border-radius: 10px;
   background-color: #f9f9f9;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .profile-title {
   text-align: center;
-  font-size: 2rem;
+  font-size: 24px;
+  font-weight: bold;
   color: #333;
   margin-bottom: 20px;
 }
@@ -19,6 +30,9 @@
 .profile-details {
   font-size: 1rem;
   color: #333;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .profile-details p {
@@ -41,16 +55,12 @@
   color: #555;
 }
 
-.preview-image {
-  max-width: 100%;
-  max-height: 400px; /* Adjust the max height as needed */
-  display: block;
-  margin: 0 auto;
-}
-
-.profile-picture-container {
+.profile-picture-container-profile {
   text-align: center;
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .profile-picture {
@@ -60,12 +70,13 @@
   object-fit: cover;
   display: block;
   margin: 0 auto;
+  margin-bottom: 10px;
 }
 
 .profile-name {
-  font-size: 1.2em;
+  font-size: 18px;
   font-weight: bold;
-  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .update-picture-label {
@@ -73,7 +84,7 @@
   padding: 10px 20px;
   margin-top: 10px;
   background-color: black;
-  color: white;
+  color: #ffffff;
   border-radius: 5px;
   cursor: pointer;
   font-size: 1em;
@@ -108,16 +119,72 @@
 .error {
   color: red;
   font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .success-message {
   background-color: #d4edda;
-  color: #155724;
+  color: green;
   border: 1px solid #c3e6cb;
   padding: 10px;
   border-radius: 5px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   text-align: center;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-form .form-group {
+  margin-bottom: 15px;
+}
+
+.profile-form .form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.profile-form .form-group input,
+.profile-form .form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.profile-form .form-group textarea {
+  resize: none;
+}
+
+.profile-form button {
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.profile-form button:hover {
+  background-color: #0056b3;
+}
+
+.btn-primary {
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
 }
 
 /* Responsive design */

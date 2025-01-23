@@ -1,0 +1,257 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.messages-container {
+  display: flex;
+  height: 90vh;
+  justify-content: center; /* Center the conversation container */
+  padding: 20px; /* Add padding around the container */
+}
+
+.sidebar {
+  width: 25%;
+  background-color: #f4f4f4;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+  border-radius: 10px; /* Add rounded corners */
+  margin-right: 20px; /* Add space between the sidebar and conversation */
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  height: 60px; /* Set a fixed height for each item */
+  overflow: hidden; /* Ensure content does not overflow */
+}
+
+.sidebar li:hover,
+.sidebar li.selected {
+  background-color: #ddd;
+}
+
+.profile-picture-container {
+  width: 50px; /* Set a fixed width for the container */
+  height: 50px; /* Set a fixed height for the container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px; /* Add space between the picture and user info */
+  padding-top: 25px; /* Add padding to the top to center the picture */
+}
+
+.profile-picture-container-2 {
+    width: 50px; /* Set a fixed width for the container */
+    height: 50px; /* Set a fixed height for the container */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px; /* Add space between the picture and user info */
+}
+
+.profile-picture {
+  width: 100%; /* Ensure the profile picture fits within the container */
+  height: 100%; /* Ensure the profile picture fits within the container */
+  border-radius: 50%; /* Make the profile picture a circle */
+  object-fit: cover; /* Ensure the image covers the area without distortion */
+}
+
+.user-info {
+  width: calc(100% - 60px); /* Adjust width to fit next to the profile picture */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center content vertically */
+  overflow: hidden; /* Ensure content does not overflow */
+}
+
+.username {
+  font-weight: bold;
+}
+
+.full-name {
+  font-size: 1.2em; /* Increase the font size */
+  font-weight: bold; /* Make the text bold */
+}
+
+.last-message {
+  font-size: 0.9em;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Truncate long messages with "..." */
+}
+
+.email {
+  font-size: 0.8em;
+  color: #555;
+}
+
+.conversation {
+  width: 50%; /* Set the width of the conversation container */
+  max-width: 800px; /* Set a maximum width */
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px; /* Add rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column; /* Ensure the send-message is at the bottom */
+}
+
+.conversation-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.conversation-header .profile-picture-container-2 {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+}
+
+.conversation-header .profile-picture {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.conversation-header .user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.conversation-header .user-details h2 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.conversation-header .user-details .email {
+  font-size: 0.9em;
+  color: #555;
+}
+
+.messages {
+  flex: 1; /* Take up remaining space */
+  overflow-y: auto;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages ul {
+  list-style: none;
+  padding: 0;
+}
+
+.messages li {
+  padding: 10px 15px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  max-width: 60%;
+  word-wrap: break-word; /* Ensure long words break to the next line */
+  position: relative;
+}
+
+.messages li.sent {
+  background-color: #dcf8c6;
+  align-self: flex-end;
+  color: #000; /* Ensure text color is visible */
+  text-align: right; /* Align text to the right */
+  margin-left: auto; /* Align bubble to the right */
+}
+
+.messages li.received {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  align-self: flex-start;
+  color: #000; /* Ensure text color is visible */
+  text-align: left; /* Align text to the left */
+}
+
+.messages li::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.messages li.sent::after {
+  right: -10px;
+  border-width: 10px 0 10px 10px;
+  border-color: transparent transparent transparent #dcf8c6;
+}
+
+.messages li.received::after {
+  left: -10px;
+  border-width: 10px 10px 10px 0;
+  border-color: transparent #fff transparent transparent;
+}
+
+.send-message {
+  display: flex;
+  align-items: center; /* Align items horizontally */
+  margin-top: auto; /* Push to the bottom */
+}
+
+.send-message textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  resize: none;
+  width: calc(100% - 60px); /* Adjust width to fit next to the button */
+  margin-right: 10px; /* Add margin to the right of the textarea */
+}
+
+.send-message button {
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  height: 40px; /* Set a fixed height for the button */
+}
+
+.send-message button:hover {
+  background-color: #0056b3;
+}
+
+.no-conversation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* Ensure it takes the full height of the container */
+}
+
+.no-conversation p {
+  color: grey;
+  font-weight: bold;
+}

@@ -23,11 +23,12 @@ const TalentLogin = () => {
     e.preventDefault();
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_ADDRESS}/api/auth/login/talent`, formData);
-      const { token } = response.data;
+      const { token, id } = response.data;
       console.log(response.data); // Log the server's response or process it
       setMessage(response.data.message || "Login successful!");
       // Save the token or user data to localStorage or context if needed
       localStorage.setItem("token", token);
+      localStorage.setItem("userId", id);
       localStorage.setItem("role", "talent"); // Save the role to localStorage
       
       // Redirect to Talent dashboard after successful login

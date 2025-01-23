@@ -5,6 +5,8 @@ import Modal from 'react-modal';
 import '../css/Profile.css';
 import { WithContext as ReactTags } from 'react-tag-input';
 import { predefinedSkills } from '../components/skillsList';
+import { db } from "../firebase"; // Import Firestore
+import { collection, addDoc, Timestamp } from "firebase/firestore"; // Import Firestore functions
 
 const TalentProfile = () => {
   const { id } = useParams(); // Get the talent ID from the URL
@@ -18,6 +20,8 @@ const TalentProfile = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [role, setRole] = useState(""); // State to store the user's role
+  const [messageContent, setMessageContent] = useState(""); // State to store the message content
+  const [messageModalIsOpen, setMessageModalIsOpen] = useState(false); // State to control the message modal
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -89,6 +93,26 @@ const TalentProfile = () => {
     }
   };
 
+  const handleSendMessage = async () => {
+    const senderId = localStorage.getItem("userId"); // Assuming you store the user ID in localStorage
+    const receiverId = id; // Talent ID from the URL
+
+    try {
+      await addDoc(collection(db, "messages"), {
+        senderId,
+        receiverId,
+        content: messageContent,
+        timestamp: Timestamp.now()
+      });
+      setMessageContent("");
+      setMessageModalIsOpen(false);
+      alert("Message sent successfully!");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Failed to send message.");
+    }
+  };
+
   if (!talentDetails) {
     return <p>Loading...</p>;
   }
@@ -98,24 +122,23 @@ const TalentProfile = () => {
       <h1 className="profile-title">Talent Profile</h1>
       {message && <div className="success-message">{message}</div>}
       {error && <p className="error">{error}</p>}
-      <div className="profile-picture-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div className="profile-picture-container-profile">
         <img
           src={talentDetails.profilePicture}
           alt="Profile"
-          style={{
-            width: '150px',
-            height: '150px',
-            borderRadius: '50%',
-            objectFit: 'cover',
-            marginBottom: '10px'
-          }}
+          className="profile-picture"
         />
-        <p className="profile-name" style={{ textAlign: 'center' }}>{talentDetails.username}</p>
+        <p className="profile-name">{talentDetails.username}</p>
         {role !== 'hr' && (
-          <label className="update-picture-label" style={{ textAlign: 'center' }}>
+          <label className="update-picture-label">
             Update Picture
             <input type="file" onChange={handlePictureChange} style={{ display: 'none' }} />
           </label>
+        )}
+        {role === 'hr' && (
+          <button onClick={() => setMessageModalIsOpen(true)} className="btn btn-primary">
+            Send Message
+          </button>
         )}
       </div>
       <Modal
@@ -136,7 +159,7 @@ const TalentProfile = () => {
           },
         }}
       >
-        {preview && <img src={preview} alt="Preview" style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover' }} />}
+        {preview && <img src={preview} alt="Preview" className="profile-picture" />}
         <button onClick={handlePictureUpload}>Upload Picture</button>
         <button onClick={() => setModalIsOpen(false)}>Cancel</button>
       </Modal>
@@ -179,13 +202,24 @@ const TalentProfile = () => {
         </div>
         <div className="profile-box">
           <strong>Skills:</strong>
-          <p>{talentDetails.skills.join(', ')}</p>
+          <ReactTags
+            tags={talentDetails.skills.map((skill) => ({ id: skill, text: skill }))}
+            suggestions={predefinedSkills.map((skill) => ({ id: skill, text: skill }))}
+            handleDelete={(index) => {
+              const newSkills = [...talentDetails.skills];
+              newSkills.splice(index, 1);
+              setTalentDetails({ ...talentDetails, skills: newSkills });
+            }}
+            handleAddition={(newTag) => {
+              setTalentDetails({ ...talentDetails, skills: [...talentDetails.skills, newTag.text] });
+            }}
+            inputFieldPosition="bottom"
+            autocomplete
+          />
         </div>
       </div>
       {role !== 'hr' && (
-        <button type="button" className="btn btn-primary" onClick={() => setEditModalIsOpen(true)}>
-          Update Profile
-        </button>
+        <button onClick={() => setEditModalIsOpen(true)} className="btn btn-primary">Edit Profile</button>
       )}
       <Modal
         isOpen={editModalIsOpen}
@@ -201,7 +235,8 @@ const TalentProfile = () => {
             transform: 'translate(-50%, -50%)',
             width: '80%',
             maxWidth: '600px',
-            height: 'auto',
+            maxHeight: '80vh', // Set maximum height
+            overflowY: 'auto', // Enable vertical scrolling
           },
         }}
       >
@@ -263,18 +298,14 @@ const TalentProfile = () => {
           <div className="profile-box">
             <div className="form-group">
               <label className="bold-label">Gender: </label>
-              <select
+              <input
+                type="text"
                 name="gender"
                 value={talentDetails.gender}
                 onChange={(e) => setTalentDetails({ ...talentDetails, gender: e.target.value })}
                 required
                 className="form-control"
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
+              />
             </div>
           </div>
           <div className="profile-box">
@@ -294,7 +325,7 @@ const TalentProfile = () => {
             <div className="form-group">
               <label className="bold-label">Phone Number: </label>
               <input
-                type="tel"
+                type="text"
                 name="phoneNumber"
                 value={talentDetails.phoneNumber}
                 onChange={(e) => setTalentDetails({ ...talentDetails, phoneNumber: e.target.value })}
@@ -319,8 +350,7 @@ const TalentProfile = () => {
           <div className="profile-box">
             <div className="form-group">
               <label className="bold-label">Experience: </label>
-              <input
-                type="text"
+              <textarea
                 name="experience"
                 value={talentDetails.experience}
                 onChange={(e) => setTalentDetails({ ...talentDetails, experience: e.target.value })}
@@ -348,13 +378,37 @@ const TalentProfile = () => {
               />
             </div>
           </div>
-          <button type="submit" className="btn btn-primary">
-            Submit
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={() => setEditModalIsOpen(false)}>
-            Cancel
-          </button>
+          <button type="submit" className="btn btn-primary">Save Changes</button>
         </form>
+      </Modal>
+      <Modal
+        isOpen={messageModalIsOpen}
+        onRequestClose={() => setMessageModalIsOpen(false)}
+        contentLabel="Send Message"
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            maxWidth: '600px',
+            height: 'auto',
+          },
+        }}
+      >
+        <h2 className="profile-title">Send Message</h2>
+        <textarea
+          value={messageContent}
+          onChange={(e) => setMessageContent(e.target.value)}
+          placeholder="Type your message here..."
+          rows="4"
+          style={{ width: '100%', marginBottom: '10px' }}
+        />
+        <button onClick={handleSendMessage} className="btn btn-primary">Send Message</button>
+        <button onClick={() => setMessageModalIsOpen(false)}>Cancel</button>
       </Modal>
     </div>
   );

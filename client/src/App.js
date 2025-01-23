@@ -10,13 +10,14 @@ import HRPostedJobs from './pages/HRPostedJobs';
 import HRPostJob from './pages/HRPostJob';
 import HREditJob from './pages/HREditJob'
 import HRProfile from './pages/HRProfile';
+import HRMessages from './pages/Messages';
 import TalentPage from "./pages/TalentPage";
 import TalentDashboard from './pages/TalentDashboard';
 import TalentRegister from "./pages/TalentRegister";
 import TalentLogin from "./pages/TalentLogin"; // Import TalentLogin component
 import TalentProfile from './pages/TalentProfile'; // Import TalentProfile component
 import TalentJobBoard from './pages/TalentJobBoard'; // Import TalentJobBoard component
-import TalentMessages from './pages/TalentMessages'; // Import TalentMessages component
+import TalentMessages from './pages/Messages'; // Import TalentMessages component
 import TalentLayout from './components/TalentLayout'; // Import TalentLayout component
 import ApplicantsList from './components/ApplicantsList'; // Import ApplicantsList component
 import SubmittedJobs from './pages/SubmittedJobs'; // Import SubmittedJobs component
@@ -39,7 +40,8 @@ const App = () => {
         <Route path="/hr/edit-job/:id" element={<ProtectedRoute><HRLayout><HREditJob /></HRLayout></ProtectedRoute>} />
         <Route path="/hr/talent-profile/:id" element={<ProtectedRoute><HRLayout><TalentProfile /></HRLayout></ProtectedRoute>} />
         <Route path="/hr/applicants/:jobId" element={<ProtectedRoute><HRLayout><ApplicantsList /></HRLayout></ProtectedRoute>} /> {/* New route for viewing applicants */}
-        
+        <Route path="/hr/messages" element={<ProtectedRoute><HRLayout><HRMessages /></HRLayout></ProtectedRoute>} />
+
         <Route path="/talent" element={<TalentPage />} />
         <Route path="/talent/login" element={<TalentLogin />} /> {/* Talent Login */}
         <Route path="/talent/register" element={<TalentRegister />} /> {/* Talent Register */}

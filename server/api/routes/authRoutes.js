@@ -172,7 +172,7 @@ router.post('/login/talent', async (req, res) => {
        process.env.JWT_SECRET, 
        { expiresIn: '1h' });
     console.log('Talent Generated JWT token:', token); // Log the generated JWT token
-    res.status(200).json({ message: 'Login successful!', token });
+    res.status(200).json({ message: 'Login successful!', token, id: talent._id });
 
   } catch (error) {
     console.error('Error during login:', error);
@@ -211,7 +211,8 @@ router.post('/login/hr', async (req, res) => {
     res.status(200).json({ 
       message: 'Login successful!', 
       token, 
-      companyName: hrPartner.companyName });
+      companyName: hrPartner.companyName,
+      id: hrPartner._id });
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ message: 'Server error', error });
