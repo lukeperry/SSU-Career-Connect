@@ -5,6 +5,15 @@
   animation: gradientAnimation 15s ease infinite;
 }
 
+.f-inherit {
+  height: inherit;
+}
+
+.f-margin {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 @keyframes gradientAnimation {
   0% {
     background-position: 0% 50%;

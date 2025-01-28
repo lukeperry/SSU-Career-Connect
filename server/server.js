@@ -10,7 +10,13 @@ const path = require('path');
 const PORT = process.env.PORT || 5000;
 
 // Connect to the database
-connectDB();
+console.log("Connecting to MongoDB...");
+connectDB().then(() => {
+  console.log("MongoDB connected successfully.");
+}).catch((err) => {
+  console.error("MongoDB connection failed:", err);
+  process.exit(1);
+});
 
 // Initialize Express app
 const app = express();
@@ -22,20 +28,8 @@ app.use(express.json());
 
 // Default route for root URL
 app.get('/', (req, res) => {
+  console.log("Received request for root URL");
   res.status(200).send('Hello World');
-});
-
-// Initialize Firebase Admin
-initializeFirebaseAdmin().then(() => {
-  // Ensure Firestore is initialized
-  const db = getDb();
-  if (!db) {
-    throw new Error('Firestore has not been initialized.');
-  }
-
-
-}).catch((error) => {
-  console.error('Failed to initialize Firebase Admin:', error);
 });
 
 // Serve static files from the uploads directory
@@ -67,18 +61,31 @@ app.use('/api/messages', messageRoutes); // Message routes
 
 // Handle 404 for API routes
 app.use('/api/*', (req, res) => {
+  console.log(`API route not found: ${req.originalUrl}`);
   res.status(404).json({ message: 'API route not found' });
 });
 
 // Handle other routes (optional)
 app.get('*', (req, res) => {
+  console.log(`Route not found: ${req.originalUrl}`);
   res.status(404).send('Cannot GET ' + req.originalUrl);
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+// Initialize Firebase Admin
+console.log("Initializing Firebase Admin...");
+initializeFirebaseAdmin().then(() => {
+  console.log("Firebase Admin initialized successfully.");
+  // Ensure Firestore is initialized
+  const db = getDb();
+  if (!db) {
+    throw new Error('Firestore has not been initialized.');
+  }
 
-// Start the server
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  // Start the server after Firebase Admin is initialized
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}).catch((error) => {
+  console.error('Failed to initialize Firebase Admin:', error);
+  process.exit(1); // Exit the process with failure if initialization fails
+});

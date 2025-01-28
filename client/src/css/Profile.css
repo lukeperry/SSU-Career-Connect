@@ -65,7 +65,6 @@ body, html {
 
 .profile-picture {
   width: 150px; /* Adjust the size as needed */
-  height: 150px; /* Adjust the size as needed */
   border-radius: 50%;
   object-fit: cover;
   display: block;
