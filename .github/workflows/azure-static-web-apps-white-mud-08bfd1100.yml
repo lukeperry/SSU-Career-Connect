@@ -4,13 +4,18 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'client/**'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
+    paths:
+      - 'client/**'
 
 jobs:
   deploy_backend:
+    if: github.event_name == 'push' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -53,6 +58,18 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          cd client
+          yarn install --frozen-lockfile
+      - name: Build project
+        run: |
+          cd client
+          yarn build
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
