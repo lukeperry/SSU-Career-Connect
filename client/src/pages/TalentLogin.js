@@ -77,5 +77,5 @@ const TalentLogin = () => {
     </div>
   );
 };
-
+//
 export default TalentLogin;
