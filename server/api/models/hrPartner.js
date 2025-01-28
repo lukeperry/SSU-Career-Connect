@@ -8,8 +8,11 @@ const hrPartnerSchema = new mongoose.Schema({
   password: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   companyName: { type: String, required: true },
-  profilePicture: { type: String }, // Add this field
-  jobPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Job' }],  // Job posts created by HR
+  profilePicture: { type: String },
+  birthday: { type: Date }, // Add this field
+  gender: { type: String }, // Add this field
+  phoneNumber: { type: String }, // Add this field
+  jobPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Job' }],
   createdAt: { type: Date, default: Date.now },
 });
 

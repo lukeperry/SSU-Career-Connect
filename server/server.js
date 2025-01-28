@@ -34,6 +34,10 @@ const dashboardRoutes = require('./api/routes/dashboardRoutes');
 const hrRoutes = require('./api/routes/hrRoutes'); // Import HR routes
 const talentRoutes = require('./api/routes/talentRoutes'); // Import Talent routes
 const matchRoutes = require('./api/routes/matchRoutes'); // Import Match routes
+const notificationRoutes = require('./api/routes/notificationRoutes'); // Import notification routes
+const messageRoutes = require('./api/routes/messageRoutes'); // Import message routes
+
+
 
 // Use routes
 app.use('/api/auth', authRoutes);  // Auth-related routes like login, register
@@ -44,6 +48,10 @@ app.use('/api/dashboard', dashboardRoutes); // Dashboard routes for talents and 
 app.use('/api/hr', hrRoutes); // Use HR routes
 app.use('/api/talent', talentRoutes); // Use Talent routes
 app.use('/api/match', matchRoutes); // Use Match routes
+app.use('/api/notifications', notificationRoutes); // Notification routes
+app.use('/api/messages', messageRoutes); // Message routes
+
+
 
 // The "catchall" handler: for any request that doesn't match one above, send back React's index.html file.
 app.get('*', (req, res) => {

@@ -14,6 +14,7 @@ const talentSchema = new mongoose.Schema({
   location: { type: String },
   experience: { type: String },
   profilePicture: { type: String },
+  resumeUrl: { type: String },
   skills: { type: [String]},
   createdAt: { type: Date, default: Date.now },
 });

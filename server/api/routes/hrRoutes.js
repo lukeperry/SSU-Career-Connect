@@ -36,7 +36,27 @@ router.post('/upload-profile-picture', verifyToken, upload.single('profilePictur
     if (!hrPartner) {
       return res.status(404).json({ message: 'HR Partner not found' });
     }
-    // ... existing code ...
+
+    if (req.file) {
+      const blobName = `${uuidv4()}-${req.file.originalname}`;
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+      console.log('Uploading to Azure Blob Storage:', blobName);
+
+      await blockBlobClient.uploadData(req.file.buffer, {
+        blobHTTPHeaders: { blobContentType: req.file.mimetype },
+      });
+
+      const profilePictureUrl = blockBlobClient.url;
+      console.log('Profile picture URL:', profilePictureUrl);
+
+      hrPartner.profilePicture = profilePictureUrl;
+      await hrPartner.save();
+
+      res.json({ message: 'Profile picture updated successfully', profilePicture: profilePictureUrl });
+    } else {
+      res.status(400).json({ message: 'No file uploaded' });
+    }
   } catch (error) {
     console.error('Error uploading profile picture:', error);
     res.status(500).json({ message: 'Server error' });
@@ -53,6 +73,35 @@ router.get('/profile', verifyToken, async (req, res) => {
     res.status(200).json(hrPartner);
   } catch (error) {
     console.error('Error fetching HR profile:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Fetch HR profile details by ID
+router.get('/profile/:id', verifyToken, async (req, res) => {
+  try {
+    const hrPartner = await HRPartner.findById(req.params.id).select('username firstName lastName email profilePicture');
+    if (!hrPartner) {
+      return res.status(404).json({ message: 'HR Partner not found' });
+    }
+    res.json(hrPartner);
+  } catch (error) {
+    console.error('Error fetching HR profile:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update HR profile
+router.put('/profile', verifyToken, async (req, res) => {
+  try {
+    const updatedData = req.body;
+    const hrPartner = await HRPartner.findByIdAndUpdate(req.user.id, updatedData, { new: true });
+    if (!hrPartner) {
+      return res.status(404).json({ message: 'HR Partner not found' });
+    }
+    res.json(hrPartner);
+  } catch (error) {
+    console.error('Error updating HR profile:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

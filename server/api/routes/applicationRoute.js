@@ -6,6 +6,7 @@ const Application = require('../models/application');
 const Job = require('../models/job');
 const Talent = require('../models/talent');
 const { calculateMatchScore } = require('../../utils/matchAlgorithm'); // Import the calculateMatchScore function
+const mongoose = require('mongoose'); // Import mongoose
 
 // Test connection
 router.get('/application', (req, res) => {
@@ -99,9 +100,30 @@ router.get('/submitted', verifyToken, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Fetch applications for HR's jobs
+router.get('/hr', verifyToken, async (req, res) => {
+  try {
+    const hrId = req.user.id; // Assuming req.user.id contains the HR's ID
+
+    const jobs = await Job.find({ postedBy: hrId }).select('_id');
+    const jobIds = jobs.map(job => job._id);
+
+    const applications = await Application.find({ jobId: { $in: jobIds } }).populate('talentId jobId');
+
+    res.json({ applications });
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get a specific application by ID
-router.get('/:id', verifyToken, async (req, res) => {
+router.get('/job/:id/applications', verifyToken, async (req, res) => {
   const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid application ID' });
+  }
   try {
     const application = await Application.findById(id).populate('talentId', 'firstName lastName profilePicture email');
     if (!application) {
@@ -113,6 +135,5 @@ router.get('/:id', verifyToken, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 
 module.exports = router;

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { db } from "../firebase"; // Import Firestore
 import { collection, query, where, onSnapshot, addDoc, Timestamp, orderBy } from "firebase/firestore"; // Import Firestore functions
 import axios from "axios";
@@ -14,7 +15,8 @@ const Messages = () => {
   const [sidebarActive, setSidebarActive] = useState(false); // State to control sidebar visibility on mobile
 
   const userId = localStorage.getItem("userId");
-  const role = localStorage.getItem("role");
+  const location = useLocation();
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -98,6 +100,7 @@ const Messages = () => {
           messagesArray.push(doc.data());
         });
         setMessages(messagesArray);
+        scrollToBottom();
       }, (error) => {
         console.error("Error fetching messages:", error);
       });
@@ -106,7 +109,22 @@ const Messages = () => {
     };
 
     fetchMessages();
-  }, [userId, role, selectedUser]);
+  }, [userId, selectedUser]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const userIdFromParams = params.get('user');
+    if (userIdFromParams) {
+      const user = users.find(user => user._id === userIdFromParams);
+      if (user) {
+        setSelectedUser(user);
+      }
+    }
+  }, [location.search, users]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleSendMessage = async () => {
     if (!selectedUser) {
@@ -115,16 +133,57 @@ const Messages = () => {
     }
 
     try {
+      const senderId = userId;
+      const receiverId = selectedUser._id;
+
+      // Fetch sender's details
+      let sender;
+      try {
+        const senderResponse = await axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/talent/profile/${senderId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+        sender = senderResponse.data;
+      } catch (error) {
+        try {
+          const senderResponse = await axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/hr/profile/${senderId}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          });
+          sender = senderResponse.data;
+        } catch (error) {
+          console.error('Error fetching sender details:', error);
+          alert('Failed to fetch sender details.');
+          return;
+        }
+      }
+
+      // Add message to Firestore
       await addDoc(collection(db, "messages"), {
-        senderId: userId,
-        receiverId: selectedUser._id,
+        senderId,
+        receiverId,
         content: messageContent,
         timestamp: Timestamp.now()
       });
+
+      // Create a notification in Firestore
+      await addDoc(collection(db, "notifications"), {
+        senderId,
+        receiverId,
+        message: `You have a new message from ${sender.firstName} ${sender.lastName}`,
+        timestamp: Timestamp.now()
+      });
+
       setMessageContent("");
+      scrollToBottom();
     } catch (error) {
       console.error("Error sending message:", error);
       alert("Failed to send message.");
+    }
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSendMessage();
     }
   };
 
@@ -187,6 +246,7 @@ const Messages = () => {
                       <p><small>{new Date(message.timestamp.toDate()).toLocaleString()}</small></p>
                     </li>
                   ))}
+                  <div ref={messagesEndRef} />
                 </ul>
               ) : (
                 <p>No messages found</p>
@@ -199,6 +259,7 @@ const Messages = () => {
                 placeholder="Type your message here..."
                 rows="2"
                 style={{ width: 'calc(100% - 60px)', marginRight: '10px' }}
+                onKeyPress={handleKeyPress}
               />
               <button onClick={handleSendMessage} className="btn btn-primary">Send</button>
             </div>

@@ -23,7 +23,7 @@ import ApplicantsList from './components/ApplicantsList'; // Import ApplicantsLi
 import SubmittedJobs from './pages/SubmittedJobs'; // Import SubmittedJobs component
 import HRDashboard from './pages/HRDashboard';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-//
+
 const App = () => {
   return (
     <Router>
@@ -49,7 +49,7 @@ const App = () => {
         <Route path="/talent/profile" element={<ProtectedRoute><TalentLayout><TalentProfile /></TalentLayout></ProtectedRoute>} /> {/* Talent Profile */}
         <Route path="/talent/job-board" element={<ProtectedRoute><TalentLayout><TalentJobBoard /></TalentLayout></ProtectedRoute>} /> {/* Talent Job Board */}
         <Route path="/talent/submitted-jobs" element={<ProtectedRoute><TalentLayout><SubmittedJobs /></TalentLayout></ProtectedRoute>} /> {/* New route */}
-        <Route path="/talent/messages" element={<ProtectedRoute><TalentLayout><TalentMessages /></TalentLayout></ProtectedRoute>} /> {/* Talent Messages */} 
+        <Route path="/talent/messages" element={<ProtectedRoute><TalentLayout><TalentMessages /></TalentLayout></ProtectedRoute>} /> {/* Talent Messages */}
       </Routes>
     </Router>
   );
