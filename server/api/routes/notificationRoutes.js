@@ -1,13 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../../utils/authMiddleware');
-const { db } = require('../../config/firebaseAdmin'); // Import Firestore from Firebase Admin SDK
+const { getDb } = require('../../config/firebaseAdmin'); // Import Firestore from Firebase Admin SDK
 
 // Get notifications for a user
 router.get('/', verifyToken, async (req, res) => {
   const userId = req.user.id;
 
   try {
+    const db = getDb();
+    if (!db) {
+      throw new Error('Firestore has not been initialized.');
+    }
+
     const notificationsRef = db.collection('notifications');
     const querySnapshot = await notificationsRef.where('receiverId', '==', userId).orderBy('timestamp', 'desc').get();
 

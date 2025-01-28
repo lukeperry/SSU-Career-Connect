@@ -33,6 +33,7 @@ const HRDashboard = () => {
         const applicationsResponse = await axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/application/hr`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log('Applications Response:', applicationsResponse.data); // Log the response
         const sortedApplications = applicationsResponse.data.applications
           ? applicationsResponse.data.applications.sort((a, b) => new Date(b.appliedAt) - new Date(a.appliedAt)).slice(0, 5)
           : [];
