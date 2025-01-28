@@ -1,6 +1,12 @@
 {
   "routes": [
     {
+      "route": "/static/*",
+      "headers": {
+        "Cache-Control": "max-age=31536000"
+      }
+    },
+    {
       "route": "/*",
       "rewrite": "/index.html"
     }
@@ -8,6 +14,7 @@
   "mimeTypes": {
     ".css": "text/css",
     ".js": "application/javascript",
+    ".json": "application/json",
     ".woff": "font/woff",
     ".woff2": "font/woff2",
     ".ttf": "font/ttf",
