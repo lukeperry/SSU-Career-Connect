@@ -20,7 +20,7 @@ import TalentJobBoard from './pages/TalentJobBoard'; // Import TalentJobBoard co
 import TalentMessages from './pages/Messages'; // Import TalentMessages component
 import TalentLayout from './components/TalentLayout'; // Import TalentLayout component
 import ApplicantsList from './components/ApplicantsList'; // Import ApplicantsList component
-import SubmittedJobs from './pages/SubmittedJobs'; // Import SubmittedJobs component
+import SubmittedJobs from './pages/SubmittedJobs'; // Import SubmittedJobs components
 import HRDashboard from './pages/HRDashboard';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
