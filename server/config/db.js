@@ -1,19 +1,31 @@
-// db.js
-
 const mongoose = require('mongoose');
-require('dotenv').config(); // Load environment variables from .env file
+const { MongoClient, ServerApiVersion } = require('mongodb');
+require('dotenv').config();
 
-// MongoDB connection string from .env
-const dbURI = process.env.MONGODB_URI;
-
-// Connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(dbURI);
-    console.log('MongoDB connected successfully');
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI is not defined in environment variables');
+    }
+
+    const options = {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true
+      }
+    };
+
+    console.log('Attempting to connect to MongoDB...');
+    await mongoose.connect(process.env.MONGODB_URI, options);
+    
+    // Test the connection with a ping
+    await mongoose.connection.db.command({ ping: 1 });
+    console.log("MongoDB connected successfully - Pinged deployment!");
+    
   } catch (err) {
-    console.error('Error connecting to MongoDB', err);
-    process.exit(1); // Exit the process with failure if connection fails
+    console.error('MongoDB connection error:', err);
+    throw err;
   }
 };
 

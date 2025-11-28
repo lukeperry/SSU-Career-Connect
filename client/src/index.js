@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -7,6 +7,12 @@ import { messaging } from './firebase'; // Import messaging
 
 // Request permission to send notifications
 const requestPermission = async () => {
+  // Only request permission if messaging is supported
+  if (!messaging) {
+    console.log('Firebase Messaging is not supported in this browser. Push notifications will not be available.');
+    return;
+  }
+
   try {
     await Notification.requestPermission();
     if (Notification.permission === 'granted') {
@@ -25,7 +31,7 @@ const requestPermission = async () => {
 
 requestPermission();
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />

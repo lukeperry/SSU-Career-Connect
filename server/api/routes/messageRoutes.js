@@ -1,50 +1,154 @@
 const express = require('express');
 const router = express.Router();
+const admin = require('../../config/firebaseAdmin');
 const { verifyToken } = require('../../utils/authMiddleware');
-const Message = require('../models/message');
-const HRPartner = require('../models/hrPartner'); // Import HRPartner model
-const Talent = require('../models/talent'); // Import Talent model
-const { db, admin } = require('../../config/firebaseAdmin'); // Import Firestore and admin from Firebase Admin SDK
-const mongoose = require('mongoose'); // Import mongoose to use ObjectId
+const mongoose = require('mongoose');
+const Talent = require('../models/talent');
+const HRPartner = require('../models/hrPartner');
 
 // Send a new message
 router.post('/', verifyToken, async (req, res) => {
-  const { senderId, receiverId, content } = req.body;
-
-  // Validate and convert IDs to ObjectId
-  if (!mongoose.Types.ObjectId.isValid(senderId) || !mongoose.Types.ObjectId.isValid(receiverId)) {
-    return res.status(400).json({ message: 'Invalid senderId or receiverId' });
-  }
-
   try {
-    // Fetch sender's details from HRPartner or Talent collections
-    console.log('Fetching sender details for ID:', senderId); // Add logging
-    let sender = await HRPartner.findById(new mongoose.Types.ObjectId(senderId));
-    if (!sender) {
-      sender = await Talent.findById(new mongoose.Types.ObjectId(senderId));
-    }
-    if (!sender) {
-      console.log('Sender not found for ID:', senderId); // Add logging
-      return res.status(404).json({ message: 'Sender not found' });
+    const { receiverId, content } = req.body;
+  const senderId = req.user._id;
+
+    console.log('[Message] Starting send attempt:', {
+      senderId,
+      receiverId,
+      contentLength: content?.length
+    });
+
+    // Verify user exists in your MongoDB (check both Talent and HRPartner)
+    const senderExists = await Talent.findById(senderId) || await HRPartner.findById(senderId);
+    const receiverExists = await Talent.findById(receiverId) || await HRPartner.findById(receiverId);
+
+    if (!senderExists || !receiverExists) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    const message = new Message({ senderId: new mongoose.Types.ObjectId(senderId), receiverId: new mongoose.Types.ObjectId(receiverId), content });
-    await message.save();
-
-    // Create a notification in Firestore
-    const notification = {
-      senderId: sender._id.toString(),
-      receiverId: receiverId,
-      message: `You have a new message from ${sender.firstName} ${sender.lastName}`,
+    // Add message to Firebase
+    const messagesRef = admin.firestore().collection('messages');
+    const newMessage = await messagesRef.add({
+      content,
+      receiverId,
+      senderId,
       timestamp: admin.firestore.FieldValue.serverTimestamp()
-    };
-    console.log('Creating notification:', notification); // Add logging
-    await db.collection('notifications').add(notification);
+    });
+    
+    console.log('[Message] Successfully added to Firestore:', newMessage.id);
 
-    res.status(201).json(message);
+    // Add notification
+    const notificationsRef = admin.firestore().collection('notifications');
+    await notificationsRef.add({
+      senderId,
+      receiverId,
+      message: `New message received`,
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    console.log('[Message] Notification created');
+
+    res.status(201).json({
+      success: true,
+      messageId: newMessage.id
+    });
   } catch (error) {
-    console.error('Error sending message:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('[Message] Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      error: 'Failed to send message',
+      details: error.message 
+    });
+  }
+});
+
+// ============================================================
+// OPTIMIZED: Messages page initialization (single API call)
+// Fetches Firebase token + all users in one request
+// ============================================================
+router.get('/init', verifyToken, async (req, res) => {
+  try {
+    const startTime = Date.now();
+    const Talent = require('../models/talent');
+    const HRPartner = require('../models/hrPartner');
+    const admin = require('firebase-admin');
+
+    // Generate Firebase custom token
+  const firebaseToken = await admin.auth().createCustomToken(req.user._id);
+
+    // Fetch all users in parallel (HR + Talent)
+    const [hrUsers, talentUsers] = await Promise.all([
+      HRPartner.find()
+        .select('_id firstName lastName email profilePicture companyName')
+        .lean(),
+      Talent.find()
+        .select('_id firstName lastName email profilePicture')
+        .lean()
+    ]);
+
+    // Map users with consistent id field
+    const allUsers = [
+      ...hrUsers.map(user => ({ ...user, id: user._id.toString(), role: 'hr' })),
+      ...talentUsers.map(user => ({ ...user, id: user._id.toString(), role: 'talent' }))
+    ];
+
+    res.json({
+      firebaseToken,
+      users: allUsers,
+  currentUserId: req.user._id,
+      currentUserRole: req.user.role,
+      responseTime: Date.now() - startTime
+    });
+
+  } catch (error) {
+    console.error('Error initializing messages:', error);
+    res.status(500).json({ error: 'Failed to initialize messages' });
+  }
+});
+
+// Get messages between two users
+router.get('/:otherUserId', verifyToken, async (req, res) => {
+  try {
+  const userId = req.user._id;
+    const otherUserId = req.params.otherUserId;
+
+    // Get messages from Firebase using MongoDB IDs
+    const messagesRef = admin.firestore().collection('messages');
+    const snapshot = await messagesRef
+      .where('senderId', 'in', [userId, otherUserId])
+      .where('receiverId', 'in', [userId, otherUserId])
+      .orderBy('timestamp', 'desc')
+      .get();
+
+    const messages = [];
+    
+    // Get user details from MongoDB to attach names
+    const [user1, user2] = await Promise.all([
+      mongoose.model('User').findById(userId),
+      mongoose.model('User').findById(otherUserId)
+    ]);
+
+    snapshot.forEach(doc => {
+      const messageData = doc.data();
+      messages.push({
+        id: doc.id,
+        content: messageData.content,
+        senderId: messageData.senderId,
+        receiverId: messageData.receiverId,
+        senderName: messageData.senderId === userId ? user1.name : user2.name,
+        receiverName: messageData.receiverId === userId ? user1.name : user2.name,
+        timestamp: messageData.timestamp?.toDate()
+      });
+    });
+
+    res.json(messages);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Failed to fetch messages' });
   }
 });
 

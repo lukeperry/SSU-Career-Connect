@@ -1,0 +1,63 @@
+2.0 Engage Graduates and Employers
+Figure 2.0.1: SSU Career Connect Graduate and Employer Feedback Mechanism
+
+The Engage Graduates and Employers objective centers on building a credible and interactive community within the SSU Career Connect platform. By implementing a dedicated feedback mechanism, the system empowers graduates to share their experiences and success stories, while also allowing employers to reflect on their hiring outcomes. This approach not only enhances the platform’s credibility but also provides authentic testimonials that inspire trust and encourage participation from new users.
+
+The feedback page is accessible to both graduates and employers. Graduates can submit feedback about their job search journeys, career achievements, and the impact of the platform on their professional growth. Employers are invited to provide feedback on the quality of talent, the efficiency of the hiring process, and their overall satisfaction with the platform. All feedback submissions are subject to moderation to ensure authenticity and relevance before being published.
+
+Publicly displaying approved feedback serves several purposes: it highlights real-world success stories, demonstrates the platform’s effectiveness, and motivates both job seekers and employers to engage more actively. This transparent feedback system helps foster a sense of community and trust, which are essential for the platform’s long-term growth and sustainability.
+
+The feedback mechanism is designed to evolve alongside the platform. As user needs change, the system will be refined to support new forms of engagement, such as video testimonials and employer spotlights. Ongoing analysis of feedback trends will guide further improvements, ensuring that the engagement objective remains aligned with the aspirations of the SSU Career Connect community.
+
+2.1 Key Insights from Feedback
+The initial deployment of the feedback mechanism has provided valuable insights. Graduates frequently express appreciation for a platform that not only connects them with employers but also celebrates their achievements. Success stories shared by graduates have been shown to increase the confidence of new users and encourage more active participation.
+
+Employers report that the ability to provide feedback on their hiring experiences helps them feel more invested in the platform’s mission. Positive employer testimonials enhance the platform’s reputation and attract more organizations to participate. The moderation process has been effective in maintaining the quality and authenticity of published feedback, which is critical for sustaining user trust.
+
+Analysis of feedback submissions reveals that the most impactful stories are those detailing specific outcomes—such as successful job placements, career advancements, and long-term professional relationships formed through the platform. These narratives validate the platform’s effectiveness and provide actionable insights for ongoing system improvements.
+
+2.2 Engagement Report
+Figure 2.2.1: SSU Career Connect Graduate and Employer Engagement Report
+
+The engagement report summarizes the volume, diversity, and impact of feedback received from both graduates and employers. Early data shows a steady increase in the number of testimonials submitted, with a balanced representation from both user groups. Most published feedback is positive, emphasizing the platform’s role in facilitating meaningful connections and successful outcomes.
+
+The report also identifies opportunities for future enhancement, such as expanding the feedback mechanism to include multimedia submissions and integrating feedback analytics into the platform’s dashboard. These improvements will further strengthen the engagement objective and ensure that SSU Career Connect continues to meet the evolving needs of its users.
+4.5 Confusion Matrix Overview
+Figure 4.5.1: SSU Career Connect Confusion Matrix
+
+The confusion matrix offers a comprehensive visualization of the SSU Career Connect system’s classification performance, detailing both correct and incorrect predictions across all job match categories. This matrix is instrumental in revealing not only the strengths of the algorithm but also the specific areas where misclassifications occur, providing a nuanced understanding of the system’s real-world applicability.
+
+The results indicate that the algorithm is highly effective at the extremes of the match spectrum. For the PERFECT (85–100%) and POOR (0–24%) categories, the system consistently achieves high precision and recall, meaning it reliably identifies both highly suitable and clearly unsuitable matches. This is particularly important for practical deployment, as it ensures that the best candidates are prioritized for job recommendations, while clear mismatches are filtered out, reducing the likelihood of poor job fits.
+
+However, the confusion matrix also highlights challenges in the mid-range categories—MODERATE, GOOD, and EXCELLENT—where the algorithm’s recall and F1 scores are notably lower. These categories are more susceptible to misclassification, often being confused with adjacent levels. This pattern suggests that the model finds it more difficult to distinguish nuanced differences in candidate-job alignment when profiles are only partially relevant or when skill matches are less distinct. Such findings are common in real-world datasets, where the boundaries between moderate and good matches are inherently ambiguous.
+
+It is also important to note that the dataset used for validation, while effective for initial testing, may not capture the full diversity and complexity of real-world job matching scenarios. The system’s strong performance in the extremes can be partially attributed to the clearer distinctions present in these categories, while the mid-range results reflect the need for further refinement and more comprehensive data. As the platform scales, expanding the dataset and validating the algorithm under broader, more varied conditions will be essential to ensure continued robustness and reliability.
+
+4.6 Key Insights from the Classification Report
+The classification report provides a detailed breakdown of the algorithm’s predictive strengths and limitations. The system achieved an overall accuracy of 80%, with an off-by-one accuracy of 80%, meaning that the vast majority of predictions are either correct or only one level away from the true category. This is a significant indicator of reliability, as it demonstrates that even when the model errs, it rarely makes large or consequential mistakes.
+
+The algorithm’s strongest performance is observed in the PERFECT (85–100%) and POOR (0–24%) categories. For PERFECT matches, the F1 score is 80.0% and recall is 88.9%, indicating that the system is highly effective at identifying candidates who are exceptionally well-suited to job requirements. The POOR category also shows robust results, with an F1 score of 67.4%, reflecting the model’s ability to filter out clearly unsuitable matches. These outcomes are crucial for real-world deployment, as they ensure that the most and least relevant candidates are classified with high confidence.
+
+In contrast, the mid-range categories—MODERATE (40–54%), GOOD (55–69%), and EXCELLENT (70–84%)—present more challenges. The recall for MODERATE and EXCELLENT is lower (23.4% and 14.3%, respectively), and these categories are often confused with adjacent levels. This pattern of under-prediction, where MODERATE cases are frequently classified as LOW or POOR, suggests a conservative bias in the algorithm’s design, prioritizing the avoidance of false positives in borderline cases. The GOOD category, with balanced precision and recall at 43.8%, also demonstrates the difficulty of distinguishing nuanced differences in partially relevant profiles.
+
+The absence of cases in the LOW (25–39%) category during evaluation highlights a gap in test coverage, making it difficult to assess the model’s performance in this range. This limitation underscores the importance of expanding the dataset to include more examples from underrepresented categories, which will help refine the algorithm’s thresholds and improve its ability to differentiate between closely related match levels.
+
+Overall, the classification report confirms that the algorithm is most effective where it matters most—identifying both highly suitable and clearly unsuitable job-skill matches. The strong off-by-one accuracy and consistent results in the extreme categories demonstrate the system’s readiness for practical deployment, while also pointing to clear avenues for future improvement.
+
+4.7 Model Classification Report
+Figure 4.7.1: SSU Career Connect Model Classification Report
+
+The model classification report further illustrates the algorithm’s performance across all match levels. The overall accuracy of 80% and off-by-one accuracy of 80% are reaffirmed, with the majority of predictions either correct or only one category away from the true label. The system’s reliability is most pronounced in the extreme categories, where precision and recall are highest. For the PERFECT category, precision is 72.7% and recall is 88.9%, while the POOR category achieves an F1 score of 67.4%. These metrics confirm the algorithm’s effectiveness in both recommending top candidates and filtering out clear mismatches.
+
+In the mid-range categories, the report highlights the ongoing challenge of distinguishing between nuanced levels of candidate-job fit. MODERATE and EXCELLENT categories, in particular, show lower recall (23.4% and 14.3%), and are often misclassified as adjacent categories. This tendency is consistent with the system’s conservative approach to borderline cases, which, while minimizing large errors, can lead to under-prediction in these ranges. The GOOD category, with precision, recall, and F1 all at 43.8%, further exemplifies the difficulty of achieving balanced performance in the middle of the match spectrum.
+
+Despite these challenges, the algorithm’s consistent performance in the most practically important categories, and its tendency to make only minor misclassifications, support its readiness for real-world deployment. The report underscores the need for ongoing refinement, particularly in expanding dataset coverage and tuning the model to better differentiate between closely related match levels.
+
+4.8 Class-Level Evaluation
+The class-level evaluation provides a granular view of the algorithm’s predictive capabilities across each match score category. For the extremes, the system excels: the PERFECT (85–100%) category achieves high precision (72.7%), recall (88.9%), and F1 score (80.0%), while the POOR (0–24%) category also performs strongly (precision: 63.3%, recall: 72.1%, F1: 67.4%). These results are critical for ensuring that the most suitable candidates are prioritized and clear mismatches are avoided, directly supporting the platform’s goal of effective job placement for graduates.
+
+In the mid-range categories—GOOD (55–69%), MODERATE (40–54%), and EXCELLENT (70–84%)—the model’s performance is more variable. The GOOD category shows balanced but moderate scores (precision, recall, and F1 all at 43.8%), while MODERATE and EXCELLENT have lower F1 scores (35.3% and 18.2%, respectively) and are frequently confused with adjacent categories. For example, MODERATE cases are often under-predicted as LOW or POOR, and EXCELLENT is commonly misclassified as MODERATE or GOOD. This pattern reflects the inherent difficulty of distinguishing nuanced, borderline matches, especially when candidate profiles and job requirements only partially align.
+
+Despite these challenges, the system’s overall performance remains robust. The exact-match accuracy is 40.6%, and the off-by-one accuracy is 80.0%, indicating that most predictions are either correct or only one level away from the true category. This is particularly valuable for job recommendation systems, where minimizing large misclassifications is essential for user trust and satisfaction.
+
+These findings highlight the need for ongoing improvements, particularly in expanding the dataset to better represent mid-range categories, refining the algorithm to reduce systematic under-prediction, and incorporating additional features that may help differentiate closely related match levels. By addressing these areas, the SSU Career Connect platform can further enhance its ability to support graduates in finding jobs that are well-aligned with their skills and aspirations.

@@ -6,13 +6,25 @@ import axios from "axios";
 import '../css/LandingPage.css'; // Import the CSS file for styling
 
 const TalentLogin = () => {
+  // Force cache bust - Version: 2025-10-28-v3
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
+  const [rememberMe, setRememberMe] = useState(false);
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Load saved email only (never store passwords!)
+  React.useEffect(() => {
+    const savedEmail = localStorage.getItem('talent_remembered_email');
+    if (savedEmail) {
+      setFormData({ email: savedEmail, password: '' });
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,58 +33,142 @@ const TalentLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_ADDRESS}/api/auth/login/talent`, formData);
-      const { token, id } = response.data;
-      console.log(response.data); // Log the server's response or process it
-      setMessage(response.data.message || "Login successful!");
-      // Save the token or user data to localStorage or context if needed
-      localStorage.setItem("token", token);
-      localStorage.setItem("userId", id);
-      localStorage.setItem("role", "talent"); // Save the role to localStorage
-      
-      // Redirect to Talent dashboard after successful login
-      navigate("/talent/dashboard");
-    } catch (error) {
-      setMessage("Login failed. Please check your credentials.");
-    }
-  };
+    console.log('Form submitted, starting login process...');
+    setIsLoading(true);
+    setMessage(""); // Clear any previous messages
 
-  return (
-    <div className="h-screen animated-gradient flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg w-96">
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_ADDRESS}/api/auth/login/talent`;
+      console.log('API URL:', apiUrl);
+      
+      // Add timeout to prevent hanging
+      const response = await axios.post(apiUrl, formData, {
+        timeout: 10000, // 10 second timeout
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('Login response received:', response.data);
+      
+      const { token, id } = response.data;
+      
+      if (!token || !id) {
+        throw new Error('Invalid response from server');
+      }
+      
+      setMessage("Login successful!");
+
+      console.log('Saving to localStorage...');
+      try {
+        localStorage.setItem("token", token);
+        localStorage.setItem("userId", id);
+        localStorage.setItem("role", "talent");
+        
+        // Save or clear remembered email only (never store passwords!)
+        if (rememberMe) {
+          localStorage.setItem("talent_remembered_email", formData.email);
+        } else {
+          localStorage.removeItem("talent_remembered_email");
+        }
+        
+        // Clean up any old password storage (security fix)
+        localStorage.removeItem("talent_remembered_password");
+        
+        console.log('localStorage saved successfully');
+      } catch (storageError) {
+        console.error('localStorage error:', storageError);
+        alert('Failed to save login data. Please check browser settings.');
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('Navigating to /talent/dashboard...');
+      // Force immediate redirect
+      window.location.replace("/talent/dashboard");
+    } catch (error) {
+      console.error('Login error:', error);
+      let errorMsg = "Login failed. Please try again.";
+      
+      if (error.code === 'ECONNABORTED') {
+        errorMsg = "Request timeout. Please check your connection.";
+      } else if (error.response) {
+        errorMsg = error.response.data?.message || "Invalid credentials.";
+      } else if (error.request) {
+        errorMsg = "Cannot reach server. Please check your connection.";
+      } else {
+        errorMsg = error.message || errorMsg;
+      }
+      
+      setMessage(errorMsg);
+      console.error('Error details:', errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };  return (
+    <div className="h-screen animated-gradient flex items-center justify-center login-container-mobile">
+      <form onSubmit={handleSubmit} className="login-form">
         <div className="flex items-center mb-4">
-          <button type="button" onClick={() => navigate(-1)} className="mr-2">
+          <button type="button" onClick={() => navigate(-1)} className="mr-2 back-button">
             <FaArrowLeft className="text-blue-600" />
           </button>
           <h2 className="text-2xl font-bold">Talent Login</h2>
         </div>
-        {message && <p className="text-red-500 mb-4">{message}</p>}
         <div className="mb-4">
-          <label className="block mb-1 font-bold">Email</label>
+          <label className="block mb-1 font-bold" htmlFor="email">Email</label>
           <input
+            id="email"
             type="email"
             name="email"
+            inputMode="email"
+            autoComplete="email"
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full p-2 border rounded"
+            placeholder="your.email@example.com"
+            className="w-full p-3 border-2 rounded-lg text-base"
+            aria-label="Email address"
+            aria-required="true"
           />
         </div>
         <div className="mb-4">
-          <label className="block mb-1 font-bold">Password</label>
+          <label className="block mb-1 font-bold" htmlFor="password">Password</label>
           <input
+            id="password"
             type="password"
             name="password"
+            autoComplete="current-password"
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full p-2 border rounded"
+            placeholder="Enter your password"
+            className="w-full p-3 border-2 rounded-lg text-base"
+            aria-label="Password"
+            aria-required="true"
           />
         </div>
-        <button type="submit" className="w-full p-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600">
-          Login
+        <div className="mb-4 flex items-center">
+          <input
+            id="rememberMe"
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <label htmlFor="rememberMe" className="ml-2 text-sm font-medium text-gray-700">
+            Remember me
+          </label>
+        </div>
+        <button 
+          type="submit" 
+          disabled={isLoading}
+          className={`w-full p-3 min-h-12 text-base font-bold rounded-lg transition ${isLoading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'}`}
+        >
+          {isLoading ? 'Logging in...' : 'Login'}
         </button>
+        {message && <p className={`mt-4 text-center font-medium ${message.includes('successful') ? 'text-green-600' : 'text-red-500'}`}>{message}</p>}
+        <p className="mt-4 text-center text-sm">
+          Don't have an account? <a href="/talent/register" className="text-blue-600 font-semibold">Register</a>
+        </p>
       </form>
     </div>
   );

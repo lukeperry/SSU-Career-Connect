@@ -1,5 +1,6 @@
 // src/config.js
-//const BASE_URL = 'http://localhost:5000/api'; // match the backend server's URL
+// DEPRECATED: Use process.env.REACT_APP_API_ADDRESS instead
+// This file is kept for backwards compatibility but should not be used
 
-const BASE_URL = 'https://ssucareerconnect.azurewebsites.net';
+const BASE_URL = process.env.REACT_APP_API_ADDRESS || 'https://api.lpzb.me';
 export default BASE_URL;

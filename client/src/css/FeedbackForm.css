@@ -1,0 +1,74 @@
+.feedback-form-container {
+  max-width: 420px;
+  margin: 2rem auto;
+  padding: 2rem 2.5rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+}
+.feedback-form-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+  color: #0f172a;
+  text-align: center;
+}
+.feedback-form-container label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #334155;
+}
+.feedback-form-container textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  resize: vertical;
+  background: #f8fafc;
+}
+.feedback-form-container select {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  background: #f8fafc;
+}
+.feedback-form-container button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #10b981;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.feedback-form-container button:hover {
+  background: #059669;
+}
+.success-message {
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  text-align: center;
+}
+.error-message {
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  text-align: center;
+}

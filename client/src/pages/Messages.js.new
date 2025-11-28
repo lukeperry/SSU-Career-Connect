@@ -1,0 +1,442 @@
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { db, auth } from "../firebase";
+import { 
+  collection, 
+  query, 
+  where, 
+  onSnapshot, 
+  addDoc, 
+  Timestamp, 
+  orderBy
+} from "firebase/firestore";
+import { signInWithCustomToken } from 'firebase/auth';
+import axios from "axios";
+import '../css/Messages.css';
+
+const Messages = () => {
+  const [messages, setMessages] = useState([]);
+  const [messageContent, setMessageContent] = useState("");
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [searchEmail, setSearchEmail] = useState("");
+  const [sidebarActive, setSidebarActive] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isNewMessage, setIsNewMessage] = useState(false);
+
+  const userId = localStorage.getItem("userId");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const messagesEndRef = useRef(null);
+
+  // Authentication effect
+  useEffect(() => {
+    console.log('Checking authentication...');
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('role');
+    
+    console.log('Auth state:', { token: !!token, userId, userRole });
+    
+    if (!token || !userId) {
+      console.log('No authentication found, redirecting to login...');
+      const loginPath = userRole === 'hr' ? '/hr/login' : '/talent/login';
+      navigate(loginPath);
+      return;
+    }
+
+    const setupFirebase = async () => {
+      try {
+        const response = await axios.post(
+          `${process.env.REACT_APP_API_ADDRESS}/api/auth/firebase-token`,
+          {},
+          { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+
+        if (response.data.firebaseToken) {
+          await signInWithCustomToken(auth, response.data.firebaseToken);
+          const firebaseUser = auth.currentUser;
+          setCurrentUser({ id: userId, role: userRole, firebaseUid: firebaseUser.uid });
+          console.log('User authenticated:', { userId, role: userRole, firebaseUid: firebaseUser.uid });
+        } else {
+          throw new Error('No Firebase token received from server');
+        }
+      } catch (error) {
+        console.error('Error setting up Firebase auth:', error);
+        setError('Error authenticating with chat system. Please try logging in again.');
+      }
+    };
+
+    setupFirebase();
+  }, [navigate]);
+
+  // Users fetch effect
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!currentUser) return;
+      
+      try {
+        setError(null);
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+
+        const [hrResponse, talentResponse] = await Promise.all([
+          axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/users/hr`, config),
+          axios.get(`${process.env.REACT_APP_API_ADDRESS}/api/users/talent`, config)
+        ]);
+
+        const hrUsers = Array.isArray(hrResponse.data) ? hrResponse.data : [];
+        const talentUsers = Array.isArray(talentResponse.data) ? talentResponse.data : [];
+        setUsers([...hrUsers, ...talentUsers]);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setError("Failed to fetch users. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [currentUser]);
+
+  // Effect for fetching conversations
+  useEffect(() => {
+    if (!currentUser) return;
+
+    let unsubscribers = [];
+    const userId = localStorage.getItem('userId');
+    const allConversations = new Map();
+
+    const handleMessages = (querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const message = doc.data();
+        const isSender = message.senderId === userId;
+        const otherUserId = isSender ? message.receiverId : message.senderId;
+        
+        const existing = allConversations.get(otherUserId);
+        if (!existing || message.timestamp > existing.timestamp) {
+          allConversations.set(otherUserId, {
+            id: doc.id,
+            ...message,
+            lastMessage: message.content || '[No message content]',
+            timestamp: message.timestamp
+          });
+        }
+      });
+
+      const sortedConversations = Array.from(allConversations.values())
+        .sort((a, b) => b.timestamp - a.timestamp);
+      setConversations(sortedConversations);
+    };
+
+    try {
+      const sentQuery = query(
+        collection(db, 'messages'),
+        where('senderId', '==', userId),
+        orderBy('timestamp', 'desc')
+      );
+
+      const receivedQuery = query(
+        collection(db, 'messages'),
+        where('receiverId', '==', userId),
+        orderBy('timestamp', 'desc')
+      );
+
+      const unsubscribeSent = onSnapshot(sentQuery, handleMessages, error => {
+        console.error("Error in sent messages listener:", error);
+        setError("Failed to load conversations: " + error.message);
+      });
+
+      const unsubscribeReceived = onSnapshot(receivedQuery, handleMessages, error => {
+        console.error("Error in received messages listener:", error);
+        setError("Failed to load conversations: " + error.message);
+      });
+      
+      unsubscribers = [unsubscribeSent, unsubscribeReceived];
+    } catch (error) {
+      console.error('Error setting up conversation listeners:', error);
+      setError('Failed to load conversations: ' + error.message);
+    }
+
+    return () => {
+      unsubscribers.forEach(unsubscribe => {
+        if (unsubscribe) {
+          try {
+            unsubscribe();
+          } catch (e) {
+            console.error("Error during cleanup:", e);
+          }
+        }
+      });
+    };
+  }, [currentUser]);
+
+  // Effect for fetching individual conversation messages
+  useEffect(() => {
+    if (!selectedUser?.id || !userId) return;
+
+    let unsubscribers = [];
+    let allMessages = new Map();
+
+    try {
+      const sentQuery = query(
+        collection(db, "messages"),
+        where('senderId', '==', userId),
+        where('receiverId', '==', selectedUser.id),
+        orderBy("timestamp", "asc")
+      );
+
+      const receivedQuery = query(
+        collection(db, "messages"),
+        where('senderId', '==', selectedUser.id),
+        where('receiverId', '==', userId),
+        orderBy("timestamp", "asc")
+      );
+
+      const updateMessages = () => {
+        const sortedMessages = Array.from(allMessages.values())
+          .sort((a, b) => (a.timestamp?.toDate() || 0) - (b.timestamp?.toDate() || 0));
+        setMessages(sortedMessages);
+        scrollToBottom();
+      };
+
+      const unsubscribeSent = onSnapshot(sentQuery, (querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          allMessages.set(doc.id, {
+            id: doc.id,
+            ...doc.data(),
+            isCurrentUser: true
+          });
+        });
+        updateMessages();
+      }, (error) => {
+        console.error("Error in sent messages listener:", error);
+        setError("Failed to load messages: " + error.message);
+      });
+
+      const unsubscribeReceived = onSnapshot(receivedQuery, (querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          allMessages.set(doc.id, {
+            id: doc.id,
+            ...doc.data(),
+            isCurrentUser: false
+          });
+        });
+        updateMessages();
+      }, (error) => {
+        console.error("Error in received messages listener:", error);
+        setError("Failed to load messages: " + error.message);
+      });
+
+      unsubscribers = [unsubscribeSent, unsubscribeReceived];
+    } catch (error) {
+      console.error("Error setting up message listeners:", error);
+      setError("Failed to set up message listener: " + error.message);
+    }
+
+    return () => {
+      unsubscribers.forEach(unsubscribe => {
+        if (unsubscribe) {
+          try {
+            unsubscribe();
+          } catch (e) {
+            console.error("Error during cleanup:", e);
+          }
+        }
+      });
+    };
+  }, [userId, selectedUser]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    
+    if (!messageContent.trim() || !selectedUser) {
+      return;
+    }
+
+    try {
+      const senderId = userId;
+      const receiverId = selectedUser.id;
+
+      const sender = users.find(user => user.id === senderId);
+      const receiver = users.find(user => user.id === receiverId);
+
+      if (!sender || !receiver) {
+        console.error('Could not find sender or receiver details');
+        setError('Failed to send message: User details not found');
+        return;
+      }
+
+      await addDoc(collection(db, "messages"), {
+        senderId,
+        receiverId,
+        content: messageContent.trim(),
+        timestamp: Timestamp.now(),
+        senderName: `${sender.firstName} ${sender.lastName}`,
+        receiverName: `${receiver.firstName} ${receiver.lastName}`
+      });
+
+      setMessageContent("");
+      scrollToBottom();
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setError("Failed to send message: " + error.message);
+    }
+  };
+
+  const handleUserSelect = (user) => {
+    setSelectedUser(user);
+    setSidebarActive(false);
+    setIsNewMessage(false); // Exit new message mode when a user is selected
+  };
+
+  const toggleSidebar = () => {
+    setSidebarActive(!sidebarActive);
+  };
+
+  if (loading) {
+    return <div className="loading">Loading messages...</div>;
+  }
+
+  if (error) {
+    return <div className="error">Error: {error}</div>;
+  }
+
+  return (
+    <div className="messages-container">
+      <div className={`sidebar ${sidebarActive ? 'active' : ''}`}>
+        <div className="sidebar-header">
+          <button 
+            className="new-message-btn"
+            onClick={() => {
+              setIsNewMessage(!isNewMessage);
+              setSearchEmail("");
+              setSelectedUser(null);
+            }}
+          >
+            {isNewMessage ? '← Back to Conversations' : 'New Message'}
+          </button>
+        </div>
+        {isNewMessage && (
+          <div className="search-box">
+            <input 
+              type="text" 
+              placeholder="Search user by email" 
+              value={searchEmail} 
+              onChange={(e) => setSearchEmail(e.target.value)} 
+            />
+          </div>
+        )}
+        <div className="users-list">
+          {isNewMessage ? (
+            // Show all users that match search
+            users
+              .filter(user => 
+                user.id !== userId && // Don't show current user
+                user.email.toLowerCase().includes(searchEmail.toLowerCase())
+              )
+              .map(user => (
+                <div
+                  key={user.id}
+                  className={`user-item ${selectedUser?.id === user.id ? 'selected' : ''}`}
+                  onClick={() => handleUserSelect(user)}
+                >
+                  <div className="user-info">
+                    <div className="user-name">{user.firstName} {user.lastName}</div>
+                    <div className="user-email">{user.email}</div>
+                  </div>
+                </div>
+              ))
+          ) : (
+            // Show only users with conversations
+            conversations.map(conv => {
+              const otherUser = users.find(u => 
+                u.id === (conv.senderId === userId ? conv.receiverId : conv.senderId)
+              );
+              if (!otherUser) return null;
+              return (
+                <div
+                  key={conv.id}
+                  className={`user-item ${selectedUser?.id === otherUser.id ? 'selected' : ''}`}
+                  onClick={() => handleUserSelect(otherUser)}
+                >
+                  <div className="user-info">
+                    <div className="user-name">{otherUser.firstName} {otherUser.lastName}</div>
+                    <div className="user-email">{otherUser.email}</div>
+                    <div className="last-message">{conv.lastMessage}</div>
+                    <div className="message-time">
+                      {conv.timestamp?.toDate().toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      <div className="chat-area">
+        <div className="chat-header">
+          <button className="toggle-sidebar" onClick={toggleSidebar}>
+            ☰
+          </button>
+          {selectedUser && (
+            <div className="selected-user">
+              {selectedUser.firstName} {selectedUser.lastName}
+            </div>
+          )}
+        </div>
+
+        <div className="messages-list" ref={messagesEndRef}>
+          {selectedUser ? (
+            messages.length > 0 ? (
+              messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`message ${message.isCurrentUser ? 'sent' : 'received'}`}
+                >
+                  <div className="message-content">{message.content}</div>
+                  <div className="message-timestamp">
+                    {message.timestamp?.toDate().toLocaleString()}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="no-messages">No messages yet</div>
+            )
+          ) : (
+            <div className="no-conversation">
+              {isNewMessage 
+                ? "Search and select a user to start a new conversation" 
+                : "Select a conversation from the sidebar"}
+            </div>
+          )}
+        </div>
+
+        {selectedUser && (
+          <form onSubmit={handleSendMessage} className="message-input">
+            <input
+              type="text"
+              value={messageContent}
+              onChange={(e) => setMessageContent(e.target.value)}
+              placeholder="Type your message..."
+            />
+            <button type="submit" disabled={!messageContent.trim()}>
+              Send
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Messages;

@@ -7,9 +7,14 @@ import axios from "axios";
 const HRRegister = () => {
   const [formData, setFormData] = useState({
     username: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     companyName: "",
+    phoneNumber: "",
+    birthday: "",
+    gender: "",
   });
 
   const [message, setMessage] = useState("");
@@ -26,10 +31,12 @@ const HRRegister = () => {
       const response = await axios.post(`${process.env.REACT_APP_API_ADDRESS}/api/auth/register/hr`, formData);
       console.log(response.data); // Optional: Log or process the response
       setMessage("Registration successful! Please log in.");
-      setFormData({ username: "", email: "", password: "", companyName: "" });
+      setFormData({ username: "", firstName: "", lastName: "", email: "", password: "", companyName: "", phoneNumber: "", birthday: "", gender: "" });
       navigate("/hr/login");
     } catch (error) {
-      setMessage("Registration failed. Please check your details.");
+      // Display the actual error message from the server
+      const errorMessage = error.response?.data?.message || "Registration failed. Please check your details.";
+      setMessage(errorMessage);
     }
   };
 
@@ -49,6 +56,28 @@ const HRRegister = () => {
             type="text"
             name="username"
             value={formData.username}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-1 font-bold">First Name</label>
+          <input
+            type="text"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-1 font-bold">Last Name</label>
+          <input
+            type="text"
+            name="lastName"
+            value={formData.lastName}
             onChange={handleChange}
             required
             className="w-full p-2 border rounded"
@@ -86,6 +115,45 @@ const HRRegister = () => {
             required
             className="w-full p-2 border rounded"
           />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-1 font-bold">Phone Number</label>
+          <input
+            type="tel"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            required
+            placeholder="+63 123 456 7890"
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-1 font-bold">Birthday</label>
+          <input
+            type="date"
+            name="birthday"
+            value={formData.birthday}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-1 font-bold">Gender</label>
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded"
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
         </div>
         <button type="submit" className="w-full p-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600">
           Register

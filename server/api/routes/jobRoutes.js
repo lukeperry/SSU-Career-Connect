@@ -21,19 +21,24 @@ router.post('/post', verifyToken, async (req, res) => {
     return res.status(400).json({ message: 'Required Skills must be a non-empty array.' });
   }
   try {
-    // Create a new job posting
-    const newJob = new Job({
+    // Create a new job posting (salary is optional)
+    const jobData = {
       title,
       description,
       requirements,
       requiredSkills,
-      salary,
       location,
       companyName,
       status: 'open',
       postedBy: req.user.id, // From token payload
- 
-    });
+    };
+    
+    // Only add salary if it's provided and not empty
+    if (salary && salary.trim() !== '') {
+      jobData.salary = salary;
+    }
+    
+    const newJob = new Job(jobData);
 
     await newJob.save();
 

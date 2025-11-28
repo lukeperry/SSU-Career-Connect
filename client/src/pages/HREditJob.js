@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom'; // Import useParams
+import toast from 'react-hot-toast';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 import '../css/HRPostJob.css'; // Link to the CSS file for styling
 import { WithContext as ReactTags } from 'react-tag-input'; // Import the ReactTags component
 import { predefinedSkills } from '../components/skillsList'; // Import predefined skills
+
+const API = process.env.REACT_APP_API_ADDRESS;
 
 const HREditJob = () => {
   const { id } = useParams(); // Get the job ID from the URL
@@ -51,26 +56,43 @@ const HREditJob = () => {
     fetchJob();
   }, [id]);
 
-  const deleteJob = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate('/');
-      return;
-    }
-    try {
-      await axios.delete(
-        `${process.env.REACT_APP_API_ADDRESS}/api/jobs/${id}`,
-        formData,
+  const handleDeleteClick = () => {
+    confirmAlert({
+      title: 'Delete Job Posting',
+      message: 'Are you sure you want to delete this job? This action cannot be undone.',
+      buttons: [
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          label: 'Yes, Delete',
+          onClick: () => deleteJob(),
+          className: 'confirm-delete-button'
+        },
+        {
+          label: 'Cancel',
+          onClick: () => {},
+          className: 'confirm-cancel-button'
         }
-      );
-      navigate('/hr/jobs'); // Redirect to the jobs list after deleting the job
-    } catch (err) { // Change 'error' to 'err'
-      setError("Failed to delete job.");
-      console.error("Error deleting job:", err.response ? err.response.data : err.message); // Log the error for debugging
+      ],
+      overlayClassName: 'confirm-overlay'
+    });
+  };
+
+  const deleteJob = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${API}/api/hr/jobs/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Job deleted successfully!");
+      navigate("/hr/posted-jobs"); // Redirect after deletion
+    } catch (error) {
+      console.error("Error deleting job:", error);
+      if (error.response) {
+        toast.error(`Error: ${error.response.data.message || "Failed to delete the job."}`);
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
     }
   };
   
@@ -205,7 +227,7 @@ const HREditJob = () => {
         >
           {isSubmitting ? 'Updating...' : 'Update Job'}
         </button>
-        <button type="button" onClick={deleteJob} className="btn btn-danger">Delete Job</button> {/* Add delete button */}
+        <button type="button" onClick={handleDeleteClick} className="btn btn-danger">Delete Job</button> {/* Add delete button */}
       </form>
       {message && <div className="announcement">{message}</div>}
       {error && <p>{error}</p>} {""}

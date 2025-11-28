@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import '../css/ApplicantsList.css'; // Import the CSS file for styling
 
 const ApplicantsList = () => {
@@ -18,6 +20,8 @@ const ApplicantsList = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+        console.log('Applicants response:', response.data);
+        console.log('First applicant profile picture:', response.data.applications[0]?.talentId?.profilePicture);
         setApplicants(response.data.applications);
         setLoading(false);
       } catch (err) {
@@ -46,8 +50,27 @@ const ApplicantsList = () => {
     }
   };
 
+  const getInitials = (firstName, lastName) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+  };
+
   if (loading) {
-    return <p>Loading applicants...</p>;
+    return (
+      <div className="applicants-list">
+        <h2><Skeleton width={200} /></h2>
+        <div className="applicants-grid">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="applicant-card">
+              <Skeleton circle height={80} width={80} />
+              <Skeleton height={24} width={150} style={{ marginTop: '10px' }} />
+              <Skeleton height={16} width={120} />
+              <Skeleton height={16} count={2} />
+              <Skeleton height={40} style={{ marginTop: '10px' }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -56,44 +79,109 @@ const ApplicantsList = () => {
 
   return (
     <div className="applicants-container">
-      <h2 className="applicants-header">Applicants</h2>
-      <div className="applicants-list">
-        {applicants.map((applicant) => {
-          console.log('Applicant:', applicant); // Log each applicant's details
-          return (
-            <div key={applicant._id} className="applicant-card" style={{ padding: '20px', textAlign: 'left' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                <img
-                  src={applicant.talentId.profilePicture}
-                  alt="Profile"
-                  style={{
-                    width: '100px',
-                    height: '100px',
-                    borderRadius: '50%',
-                    objectFit: 'cover'
-                  }}
-                />
-              </div>
-              <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                <Link to={`/hr/talent-profile/${applicant.talentId._id}`} className="btn btn-link">View Profile</Link>
-              </div>
-              <div className="applicant-details">
-                <p>Name: {applicant.talentId.firstName} {applicant.talentId.lastName}</p>
-                <p>Email: {applicant.talentId.email}</p>
-                <p style={{ fontWeight: 'bold', color: applicant.status === 'accepted' ? 'green' : applicant.status === 'rejected' ? 'red' : 'black' }}>
-                  Status: {applicant.status}
-                </p>
-                <p>Score: {Math.round(applicant.matchScore * 100)}%</p> {/* Display the match score */}
-                <p>Applied At: {new Date(applicant.appliedAt).toLocaleString()}</p>
-                <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'center' }}>
-                  <button onClick={() => handleStatusChange(applicant._id, 'accepted')} className="btn btn-sm" style={{ marginRight: '10px', backgroundColor: 'green', color: 'white' }}>Accept</button>
-                  <button onClick={() => handleStatusChange(applicant._id, 'rejected')} className="btn btn-danger btn-sm">Reject</button>
+      <h2 className="applicants-header">Applicants for This Position</h2>
+      {applicants.length === 0 ? (
+        <div className="no-applicants">
+          <p>No applicants yet for this position.</p>
+        </div>
+      ) : (
+        <div className="applicants-list">
+          {applicants.map((applicant) => {
+            console.log('Rendering applicant:', applicant.talentId.firstName, applicant.talentId.lastName);
+            console.log('Profile picture URL:', applicant.talentId.profilePicture);
+            
+            const profilePictureUrl = applicant.talentId.profilePicture;
+            const initials = getInitials(applicant.talentId.firstName, applicant.talentId.lastName);
+            
+            return (
+              <div key={applicant._id} className="applicant-card-modern">
+                <div className="applicant-card-header">
+                  <div className="profile-picture-wrapper">
+                    {profilePictureUrl ? (
+                      <>
+                        <img
+                          src={profilePictureUrl}
+                          alt={`${applicant.talentId.firstName} ${applicant.talentId.lastName}`}
+                          className="applicant-profile-pic"
+                          onError={(e) => {
+                            console.error('❌ Failed to load profile picture:', profilePictureUrl);
+                            console.error('Image error event:', e);
+                            e.target.style.display = 'none';
+                            const fallback = e.target.nextElementSibling;
+                            if (fallback) {
+                              fallback.style.display = 'flex';
+                            }
+                          }}
+                          onLoad={(e) => {
+                            console.log('✅ Profile picture loaded successfully:', profilePictureUrl);
+                          }}
+                        />
+                        <div className="applicant-profile-fallback" style={{ display: 'none' }}>
+                          {initials}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="applicant-profile-fallback">
+                        {initials}
+                      </div>
+                    )}
+                  </div>
+                  <div className="applicant-name-section">
+                    <h3 className="applicant-full-name">
+                      {applicant.talentId.firstName} {applicant.talentId.lastName}
+                    </h3>
+                    <div className="applicant-match-score">
+                      <span className="score-badge">{Math.round(applicant.matchScore * 100)}% Match</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="applicant-card-body">
+                  <div className="applicant-info-row">
+                    <span className="info-label">📧 Email:</span>
+                    <span className="info-value">{applicant.talentId.email}</span>
+                  </div>
+                  <div className="applicant-info-row">
+                    <span className="info-label">📅 Applied:</span>
+                    <span className="info-value">{new Date(applicant.appliedAt).toLocaleDateString()}</span>
+                  </div>
+                  <div className="applicant-info-row">
+                    <span className="info-label">📊 Status:</span>
+                    <span className={`status-badge status-${applicant.status}`}>
+                      {applicant.status.charAt(0).toUpperCase() + applicant.status.slice(1)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="applicant-card-actions">
+                  <Link 
+                    to={`/hr/talent-profile/${applicant.talentId._id}`} 
+                    className="btn-view-profile"
+                  >
+                    View Full Profile
+                  </Link>
+                  <div className="status-actions">
+                    <button 
+                      onClick={() => handleStatusChange(applicant._id, 'accepted')} 
+                      className="btn-accept"
+                      disabled={applicant.status === 'accepted'}
+                    >
+                      ✓ Accept
+                    </button>
+                    <button 
+                      onClick={() => handleStatusChange(applicant._id, 'rejected')} 
+                      className="btn-reject"
+                      disabled={applicant.status === 'rejected'}
+                    >
+                      ✕ Reject
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

@@ -14,6 +14,8 @@ const registerUser = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   try {
+    console.log('Register attempt:', { name, email, role }); // Log registration data
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Email is already registered' });
@@ -30,7 +32,7 @@ const registerUser = async (req, res) => {
 
     res.status(201).json({ message: 'User registered successfully', token });
   } catch (err) {
-    console.error(err);
+    console.error('Registration error:', err);
     res.status(500).json({ message: 'Error registering user', error: err });
   }
 };
@@ -45,7 +47,7 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    console.log('Login attempt:', { email, password });
+    console.log('Login attempt:', { email }); // Log login data
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -53,19 +55,18 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    console.log('User found:', user);
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       console.log('Password does not match');
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    console.log('Password matches');
+    const payload = { userId: user._id };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(200).json({ message: 'Login successful' });
+    res.status(200).json({ message: 'Login successful', token });
   } catch (err) {
-    console.error('Error during login:', err);
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Error logging in', error: err });
   }
 };

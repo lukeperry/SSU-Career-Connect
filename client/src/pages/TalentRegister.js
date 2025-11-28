@@ -49,7 +49,9 @@ const TalentRegister = () => {
       navigate("/talent/login");
     } catch (error) {
       console.error("Error during registration:", error);
-      setMessage("Registration failed. Please check your details.");
+      // Display the actual error message from the server
+      const errorMessage = error.response?.data?.message || "Registration failed. Please check your details.";
+      setMessage(errorMessage);
     }
   };
 

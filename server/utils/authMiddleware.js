@@ -17,7 +17,16 @@ const verifyToken = (req, res, next) => {
     req.user = decoded; // Attach the decoded payload to the request object
     next(); // Continue to the next middleware/route
   } catch (error) {
-    console.error('Error verifying token:', error); // Log the error
+    // Suppress logging for expected errors (malformed tokens from logout or no login)
+    // Only log unexpected errors like signature verification failures
+    if (error.name === 'JsonWebTokenError' && error.message.includes('malformed')) {
+      // Silent - these are expected when not logged in
+    } else if (error.name === 'TokenExpiredError') {
+      // Silent - these are expected when sessions expire
+    } else {
+      // Log unexpected errors
+      console.error('Error verifying token:', error);
+    }
     return res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
